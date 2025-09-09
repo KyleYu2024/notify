@@ -9,9 +9,10 @@ import (
 	"text/template"
 	"time"
 
-	"notify/internal/config"
-	"notify/internal/logger"
-	"notify/internal/notifier"
+	"github.com/jianxcao/notify/internal/config"
+	"github.com/jianxcao/notify/internal/logger"
+	"github.com/jianxcao/notify/internal/notifier"
+	"github.com/jianxcao/notify/internal/pluginmgr"
 )
 
 var funcMap = template.FuncMap{
@@ -115,6 +116,7 @@ var funcMap = template.FuncMap{
 type NotificationApp struct {
 	configManager *config.ConfigManager
 	notifiers     map[string]notifier.Notifier
+	pluginManager *pluginmgr.Manager
 }
 
 // NewNotificationApp 创建通知应用实例
@@ -126,6 +128,9 @@ func NewNotificationApp(configManager *config.ConfigManager) *NotificationApp {
 
 	// 初始化通知服务
 	app.InitNotifiers()
+
+	// 初始化插件管理器
+	app.InitPlugins()
 
 	return app
 }
@@ -296,6 +301,18 @@ func (app *NotificationApp) parseFeishuConfig(configData map[string]interface{})
 	return cfg, nil
 }
 
+// InitPlugins 初始化插件系统
+func (app *NotificationApp) InitPlugins() {
+	// 创建插件管理器，插件目录为 plugins（相对于运行目录）
+	app.pluginManager = pluginmgr.NewManager("plugins")
+
+	// 加载所有插件
+	if err := app.pluginManager.LoadAll(); err != nil {
+		logger.Error("加载插件失败: %v", err)
+		return
+	}
+}
+
 // Send 发送通知
 func (app *NotificationApp) Send(ctx context.Context, appConfig config.NotificationApp, req *map[string]any) error {
 	// 获取通知应用配置
@@ -308,30 +325,86 @@ func (app *NotificationApp) Send(ctx context.Context, appConfig config.Notificat
 		return fmt.Errorf("通知应用 %s 未启用", appConfig.Name)
 	}
 
+	// 检查是否配置了插件，优先使用插件处理
+	if appConfig.PluginID != "" {
+		return app.sendWithPlugin(ctx, appConfig, req)
+	}
+
+	// 如果没有配置插件，使用模板处理
+	return app.sendWithTemplate(ctx, appConfig, req)
+}
+
+// sendWithPlugin 使用插件处理并发送通知
+func (app *NotificationApp) sendWithPlugin(ctx context.Context, appConfig config.NotificationApp, req *map[string]any) error {
+	if app.pluginManager == nil {
+		return fmt.Errorf("插件管理器未初始化")
+	}
+
+	// 检查插件是否存在和启用
+	if !app.pluginManager.IsPluginEnabled(appConfig.PluginID) {
+		return fmt.Errorf("插件 %s 不存在或未启用", appConfig.PluginID)
+	}
+
+	// 使用插件处理数据
+	output, err := app.pluginManager.ProcessChain(ctx, appConfig.PluginID, *req)
+	if err != nil {
+		return fmt.Errorf("插件处理失败: %w", err)
+	}
+
+	// 将插件输出转换为通知消息
+	message := &notifier.NotificationMessage{
+		Title:     output.Title,
+		Content:   output.Content,
+		Image:     output.Image,
+		URL:       output.URL,
+		Timestamp: time.Now().Format("2006-01-02 15:04:05"),
+	}
+
+	// 如果插件输出没有图片，使用应用默认图片
+	if message.Image == "" {
+		message.Image = appConfig.DefaultImage
+	}
+
+	// 处理目标列表
+	var targets []string
+	if len(output.Targets) > 0 {
+		targets = output.Targets
+	}
+
+	return app.sendToNotifiers(ctx, appConfig, message, targets)
+}
+
+// sendWithTemplate 使用模板处理并发送通知
+func (app *NotificationApp) sendWithTemplate(ctx context.Context, appConfig config.NotificationApp, req *map[string]any) error {
 	// 根据TemplateID查找模板内容
 	template, err := app.getTemplateContent(appConfig.TemplateID)
 	if err != nil {
 		return fmt.Errorf("获取模板失败: %w", err)
 	}
+
 	title, err := app.renderTemplate(appConfig.TemplateID+"_title", template.Title, req)
 	if err != nil {
 		return fmt.Errorf("渲染消息模板失败: %w", err)
 	}
+
 	// 渲染消息模板
 	content, err := app.renderTemplate(appConfig.TemplateID+"_content", template.Content, req)
 	if err != nil {
 		return fmt.Errorf("渲染消息模板失败: %w", err)
 	}
+
 	url, _ := app.renderTemplate(appConfig.TemplateID+"_url", template.URL, req)
 	image, _ := app.renderTemplate(appConfig.TemplateID+"_image", template.Image, req)
 	if image == "" {
 		image = appConfig.DefaultImage
 	}
+
 	targetsStr, _ := app.renderTemplate(appConfig.TemplateID+"_targets", template.Targets, req)
 	targets := []string{}
 	if targetsStr != "" {
 		targets = strings.Split(targetsStr, ",")
 	}
+
 	// 创建通知消息
 	message := &notifier.NotificationMessage{
 		Title:     title,
@@ -340,9 +413,16 @@ func (app *NotificationApp) Send(ctx context.Context, appConfig config.Notificat
 		URL:       url,
 		Timestamp: time.Now().Format("2006-01-02 15:04:05"),
 	}
+
+	return app.sendToNotifiers(ctx, appConfig, message, targets)
+}
+
+// sendToNotifiers 发送消息到所有配置的通知服务
+func (app *NotificationApp) sendToNotifiers(ctx context.Context, appConfig config.NotificationApp, message *notifier.NotificationMessage, targets []string) error {
 	if len(appConfig.Notifiers) == 0 {
 		return fmt.Errorf("通知应用 %s 未配置任何通知服务", appConfig.Name)
 	}
+
 	// 发送到配置的通知服务 - 并发发送，最多10个协程
 	const maxConcurrentNotifiers = 10
 
@@ -408,7 +488,7 @@ func (app *NotificationApp) Send(ctx context.Context, appConfig config.Notificat
 }
 
 // renderTemplate 渲染消息模板
-func (app *NotificationApp) renderTemplate(name string, templateStr string, data *map[string]any) (string, error) {
+func (app *NotificationApp) renderTemplate(name, templateStr string, data *map[string]any) (string, error) {
 	if templateStr == "" {
 		// 如果没有模板，使用默认格式
 		return "", fmt.Errorf("模板不能为空")
@@ -436,6 +516,11 @@ func (app *NotificationApp) GetNotificationApps() map[string]config.Notification
 // GetNotifiers 获取所有通知服务
 func (app *NotificationApp) GetNotifiers() map[string]notifier.Notifier {
 	return app.notifiers
+}
+
+// GetPluginManager 获取插件管理器
+func (app *NotificationApp) GetPluginManager() *pluginmgr.Manager {
+	return app.pluginManager
 }
 
 // getTemplateContent 根据模板ID获取模板内容

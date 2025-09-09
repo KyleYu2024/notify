@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"notify/internal/app"
-	"notify/internal/config"
-	"notify/internal/logger"
+	"github.com/jianxcao/notify/internal/app"
+	"github.com/jianxcao/notify/internal/config"
+	"github.com/jianxcao/notify/internal/logger"
 
 	"github.com/gin-gonic/gin"
 )

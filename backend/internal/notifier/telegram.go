@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"notify/internal/config"
-	"notify/internal/logger"
+	"github.com/jianxcao/notify/internal/config"
+	"github.com/jianxcao/notify/internal/logger"
 
 	"github.com/go-resty/resty/v2"
 )

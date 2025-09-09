@@ -89,9 +89,10 @@ type NotificationApp struct {
 	Description  string   `yaml:"description" json:"description"`
 	Enabled      bool     `yaml:"enabled" json:"enabled"`
 	Notifiers    []string `yaml:"notifiers" json:"notifiers"`
-	TemplateID   string   `yaml:"template_id" json:"templateId"`        // 关联的模板ID
-	DefaultImage string   `yaml:"default_image" json:"defaultImage"`    // 默认图片URL
-	Auth         *AppAuth `yaml:"auth,omitempty" json:"auth,omitempty"` // 可选字段
+	TemplateID   string   `yaml:"template_id" json:"templateId"`                 // 关联的模板ID
+	PluginID     string   `yaml:"plugin_id,omitempty" json:"pluginId,omitempty"` // 关联的插件ID
+	DefaultImage string   `yaml:"default_image" json:"defaultImage"`             // 默认图片URL
+	Auth         *AppAuth `yaml:"auth,omitempty" json:"auth,omitempty"`          // 可选字段
 }
 
 // AppAuth 通知应用的认证配置
@@ -260,6 +261,9 @@ func (cm *ConfigManager) UpdateApp(appName string, updates map[string]interface{
 	if templateID, ok := updates["template_id"].(string); ok {
 		app.TemplateID = templateID
 	}
+	if pluginID, ok := updates["plugin_id"].(string); ok {
+		app.PluginID = pluginID
+	}
 	if authData, ok := updates["auth"].(map[string]interface{}); ok {
 		// 如果Auth字段为nil，先初始化
 		if app.Auth == nil {
@@ -360,4 +364,19 @@ func (cm *ConfigManager) GetAppsUsingNotifier(notifierName string) []string {
 		}
 	}
 	return appsUsingNotifier
+}
+
+// GetAppsUsingPlugin 获取使用指定插件的应用列表
+func (cm *ConfigManager) GetAppsUsingPlugin(pluginID string) []string {
+	if cm.config == nil {
+		return nil
+	}
+
+	var apps []string
+	for appName, app := range cm.config.NotificationApps {
+		if app.PluginID == pluginID {
+			apps = append(apps, appName)
+		}
+	}
+	return apps
 }

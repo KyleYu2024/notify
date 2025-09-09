@@ -3,11 +3,12 @@ package logger
 import (
 	"context"
 	"log/slog"
-	"notify/internal/config"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/jianxcao/notify/internal/config"
 )
 
 var Logger *slog.Logger

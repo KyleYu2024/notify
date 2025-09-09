@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"notify/internal/config"
-	"notify/internal/utils"
+	"github.com/jianxcao/notify/internal/config"
+	"github.com/jianxcao/notify/internal/utils"
 
 	"github.com/go-resty/resty/v2"
 )

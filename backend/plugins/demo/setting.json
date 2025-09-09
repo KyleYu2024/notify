@@ -1,0 +1,77 @@
+{
+  "id": "demo",
+  "name": "Demo Plugin",
+  "version": "1.0.0",
+  "description": "演示插件，展示如何处理通知数据并转换为标准格式",
+  "author": "Notify Team",
+  "settings": {
+    "add_timestamp": true,
+    "debug": true,
+    "default_image": "https://test.com/image.png",
+    "prefix": "TEST"
+  },
+  "ui": {
+    "fields": [
+      {
+        "default": "Demo",
+        "help": "将在标题前添加的前缀文本",
+        "label": "消息前缀",
+        "name": "prefix",
+        "placeholder": "请输入消息前缀",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "default": true,
+        "help": "是否在内容中添加时间戳",
+        "label": "添加时间戳",
+        "name": "add_timestamp",
+        "required": false,
+        "type": "boolean"
+      },
+      {
+        "help": "当消息中没有图片时使用的默认图片",
+        "label": "默认图片URL",
+        "name": "default_image",
+        "placeholder": "https://example.com/image.png",
+        "required": false,
+        "type": "text"
+      },
+      {
+        "default": false,
+        "help": "启用调试模式将在输出中包含更多信息",
+        "label": "调试模式",
+        "name": "debug",
+        "required": false,
+        "type": "boolean"
+      }
+    ],
+    "groups": [
+      {
+        "collapsible": false,
+        "defaultOpen": true,
+        "description": "插件的基本配置选项",
+        "fields": [
+          "prefix",
+          "add_timestamp"
+        ],
+        "name": "basic",
+        "title": "基础设置"
+      },
+      {
+        "collapsible": true,
+        "defaultOpen": false,
+        "description": "高级配置选项",
+        "fields": [
+          "default_image",
+          "debug"
+        ],
+        "name": "advanced",
+        "title": "高级设置"
+      }
+    ]
+  },
+  "enabled": true,
+  "plugin_file": "plugin.so",
+  "config_file": ""
+}

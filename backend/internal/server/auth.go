@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"notify/internal/config"
-	"notify/internal/logger"
+	"github.com/jianxcao/notify/internal/config"
+	"github.com/jianxcao/notify/internal/logger"
 
 	"github.com/gin-gonic/gin"
 )

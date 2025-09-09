@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"notify/internal/config"
-	"notify/internal/logger"
+	"github.com/jianxcao/notify/internal/config"
+	"github.com/jianxcao/notify/internal/logger"
 
 	"github.com/go-resty/resty/v2"
 	lark "github.com/larksuite/oapi-sdk-go/v3"

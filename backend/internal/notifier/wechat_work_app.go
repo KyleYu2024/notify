@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"notify/internal/config"
+	"github.com/jianxcao/notify/internal/config"
 
 	"github.com/go-resty/resty/v2"
 )

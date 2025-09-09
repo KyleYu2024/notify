@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"notify/internal/config"
+	"github.com/jianxcao/notify/internal/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,6 +32,9 @@ func (s *HTTPServer) setupAdminRoutes(api *gin.RouterGroup) {
 
 		// 通知服务管理
 		s.setupNotifierManagementRoutes(admin)
+
+		// 插件管理
+		s.setupPluginManagementRoutes(admin)
 	}
 }
 

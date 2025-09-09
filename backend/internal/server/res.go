@@ -55,9 +55,18 @@ const (
 	// 通知发送相关错误码 (5000-5999)
 	NOTIFICATION_SEND_FAILED = 5001 // 通知发送失败
 
+	// 插件相关错误码 (6000-6999)
+	PLUGIN_NOT_FOUND     = 6001 // 插件不存在
+	PLUGIN_DISABLED      = 6002 // 插件未启用
+	PLUGIN_CONFIG_ERROR  = 6003 // 插件配置错误
+	PLUGIN_LOAD_FAILED   = 6004 // 插件加载失败
+	PLUGIN_PROCESS_ERROR = 6005 // 插件处理错误
+	PLUGIN_IN_USE        = 6006 // 插件正在使用中
+
 	// 系统错误码 (9000-9999)
 	SYSTEM_ERROR        = 9001  // 系统错误
-	CONFIG_ERROR        = 9002  // 配置错误
-	HEALTH_CHECK_FAILED = 9003  // 健康检查失败
+	SERVER_ERROR        = 9002  // 服务器错误
+	CONFIG_ERROR        = 9003  // 配置错误
+	HEALTH_CHECK_FAILED = 9004  // 健康检查失败
 	DEFAULT_ERROR       = 99999 // 默认错误
 )

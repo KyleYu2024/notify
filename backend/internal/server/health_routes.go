@@ -3,7 +3,8 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"notify/internal/config"
+
+	"github.com/jianxcao/notify/internal/config"
 
 	"github.com/gin-gonic/gin"
 )
