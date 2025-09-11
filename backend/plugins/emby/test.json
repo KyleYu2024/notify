@@ -1,0 +1,11 @@
+{
+    "Date": "2025-09-11T07:25:30.8337187Z",
+    "Description": "Test Notification Description",
+    "Event": "system.notificationtest",
+    "Server": {
+        "Id": "asdfasdfasdf",
+        "Name": "test-server",
+        "Version": "4.8.11.0"
+    },
+    "Title": "Test Notification"
+}

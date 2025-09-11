@@ -7,15 +7,6 @@ type Plugin interface {
 	// ID 返回插件的唯一标识
 	ID() string
 
-	// Name 返回插件名称
-	Name() string
-
-	// Version 返回插件版本
-	Version() string
-
-	// Desc 返回插件描述
-	Desc() string
-
 	// DefaultSettings 返回插件默认设置
 	DefaultSettings() map[string]any
 
@@ -63,4 +54,4 @@ type MetaData struct {
 type NewFunc func() (Plugin, error)
 
 // UIConfig UI配置结构
-type UIConfig any
+type UIConfig string

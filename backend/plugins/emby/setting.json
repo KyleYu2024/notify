@@ -1,0 +1,30 @@
+{
+    "id": "emby",
+    "name": "Emby Plugin",
+    "version": "1.0.0",
+    "description": "解析 Emby Webhook 事件并生成标准输出",
+    "author": "Notify Team",
+    "settings": {
+        "prefer_url_names": [
+            "MovieDb",
+            "IMDb",
+            "Trakt"
+        ],
+        "is_show_time": true,
+        "is_show_user": true,
+        "is_show_device": true,
+        "is_show_ip": true,
+        "is_show_progress": true,
+        "is_show_type": true,
+        "is_show_year": true,
+        "targets": "",
+        "image_source": "remote",
+        "emby_base_url": "https://media.jxcao.cn:2053",
+        "emby_api_key": "c4c8008b58114d48b57cf442ab1bf301",
+        "link_source": ""
+    },
+    "ui": "",
+    "enabled": true,
+    "plugin_file": "plugin.so",
+    "config_file": ""
+}
