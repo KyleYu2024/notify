@@ -163,8 +163,8 @@ func (m *Manager) loadOne(pluginDir string) error {
 
 	// 获取插件实例并进行类型断言
 	instanceInterface := results[0].Interface()
-	instance, ok := instanceInterface.(pluginsdk.Plugin)
-	if !ok {
+	instance, err := pluginsdk.WrapPlugin(instanceInterface)
+	if err != nil {
 		return fmt.Errorf("插件实例类型错误，期望 pluginsdk.Plugin，实际 %T", instanceInterface)
 	}
 
