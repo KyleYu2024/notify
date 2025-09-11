@@ -2,21 +2,6 @@ package pluginsdk
 
 import "context"
 
-// Logger 插件日志接口
-type Logger interface {
-	// Debug 输出调试日志
-	Debug(format string, args ...any)
-
-	// Info 输出信息日志
-	Info(format string, args ...any)
-
-	// Warn 输出警告日志
-	Warn(format string, args ...any)
-
-	// Error 输出错误日志
-	Error(format string, args ...any)
-}
-
 // Plugin 插件接口
 type Plugin interface {
 	// ID 返回插件的唯一标识
@@ -33,9 +18,6 @@ type Plugin interface {
 
 	// DefaultSettings 返回插件默认设置
 	DefaultSettings() map[string]any
-
-	// SetLogger 设置插件日志器
-	SetLogger(logger Logger)
 
 	// Process 处理输入数据，返回标准化输出
 	Process(ctx context.Context, input map[string]any, settings map[string]any) (*Output, error)

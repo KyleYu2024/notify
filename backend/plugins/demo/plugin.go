@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jianxcao/notify/pkg/pluginsdk"
+	"github.com/jianxcao/notify/backend/pkg/logger"
+	"github.com/jianxcao/notify/backend/pkg/pluginsdk"
 )
 
 // DemoPlugin 演示插件
 type DemoPlugin struct {
-	logger pluginsdk.Logger
 }
 
 // ID 返回插件唯一标识
@@ -44,16 +44,11 @@ func (p *DemoPlugin) DefaultSettings() map[string]any {
 	}
 }
 
-// SetLogger 设置插件日志器
-func (p *DemoPlugin) SetLogger(logger pluginsdk.Logger) {
-	p.logger = logger
-}
-
 // Process 处理输入数据，返回标准化输出
 func (p *DemoPlugin) Process(ctx context.Context, input map[string]any, settings map[string]any) (*pluginsdk.Output, error) {
 	// 记录处理开始
-	if p.logger != nil {
-		p.logger.Info("开始处理通知数据")
+	if logger.Logger != nil {
+		logger.Logger.Info("开始处理通知数据")
 	}
 
 	// 从输入数据中提取信息
@@ -75,8 +70,8 @@ func (p *DemoPlugin) Process(ctx context.Context, input map[string]any, settings
 		url = ""
 	}
 
-	if p.logger != nil {
-		p.logger.Debug(fmt.Sprintf("提取数据: title='%s', content='%s', image='%s', url='%s'", title, content, image, url))
+	if logger.Logger != nil {
+		logger.Logger.Debug(fmt.Sprintf("提取数据: title='%s', content='%s', image='%s', url='%s'", title, content, image, url))
 	}
 
 	// 处理目标列表
@@ -86,8 +81,8 @@ func (p *DemoPlugin) Process(ctx context.Context, input map[string]any, settings
 		targets = strings.Split(targetsStr, ",")
 	}
 
-	if p.logger != nil && len(targets) > 0 {
-		p.logger.Debug(fmt.Sprintf("找到目标列表: %v", targets))
+	if logger.Logger != nil && len(targets) > 0 {
+		logger.Logger.Debug(fmt.Sprintf("找到目标列表: %v", targets))
 	}
 
 	// 构建输出
@@ -108,8 +103,8 @@ func (p *DemoPlugin) Process(ctx context.Context, input map[string]any, settings
 	}
 
 	// 记录处理完成
-	if p.logger != nil {
-		p.logger.Info(fmt.Sprintf("通知数据处理完成: title='%s', targets=%d个", output.Title, len(output.Targets)))
+	if logger.Logger != nil {
+		logger.Logger.Info(fmt.Sprintf("通知数据处理完成: title='%s', targets=%d个", output.Title, len(output.Targets)))
 	}
 
 	return output, nil

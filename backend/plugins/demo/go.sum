@@ -1,2 +1,8 @@
-github.com/jianxcao/notify v0.0.0-20250909095913-ed658c59b805 h1:hkYQsH7isyx4lspUoE9FDq4oWpesY9ykpproNe9gGOU=
-github.com/jianxcao/notify v0.0.0-20250909095913-ed658c59b805/go.mod h1:nBqk3Xt9aBz7hJ2eMwcCB4EDmv8SCcw2JNXn/SLMD6Q=
+github.com/jianxcao/notify/backend v0.0.0-20250911025102-6c9cc29ce12a h1:tXo3kXU8ARwGkOkwVXehT1tlH01eUGYthR8zne9yBFQ=
+github.com/jianxcao/notify/backend v0.0.0-20250911025102-6c9cc29ce12a/go.mod h1:chYHG4davtXs894agbRhODzuH6xMzaX1bSD5XromRKA=
+github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
+github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

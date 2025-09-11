@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jianxcao/notify/internal/app"
-	"github.com/jianxcao/notify/internal/config"
-	"github.com/jianxcao/notify/internal/logger"
-	"github.com/jianxcao/notify/internal/server"
+	"github.com/jianxcao/notify/backend/pkg/app"
+	"github.com/jianxcao/notify/backend/pkg/config"
+	"github.com/jianxcao/notify/backend/pkg/logger"
+	"github.com/jianxcao/notify/backend/pkg/server"
 )
 
 var (

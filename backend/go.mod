@@ -1,4 +1,4 @@
-module github.com/jianxcao/notify
+module github.com/jianxcao/notify/backend
 
 go 1.24.2
 
