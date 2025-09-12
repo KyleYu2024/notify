@@ -63,6 +63,7 @@ export const usePluginsStore = defineStore('plugins', {
       const url = enabled ? `/admin/plugins/${id}/enable` : `/admin/plugins/${id}/disable`
       const res = await http.request<{ message?: string }>({ method: 'PUT', url })
       if (res.code === 0) {
+        toast.success('插件设置成功')
         const target = this.list.find((p) => p.id === id)
         if (target) target.enabled = enabled
       } else {
@@ -78,6 +79,7 @@ export const usePluginsStore = defineStore('plugins', {
         data: { settings },
       })
       if (res.code === 0) {
+        toast.success('插件配置更新成功')
         const target = this.list.find((p) => p.id === id)
         if (target) target.settings = settings
       }
