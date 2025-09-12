@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"plugin"
 	"reflect"
+	"sort"
 	"time"
 
 	"github.com/jianxcao/notify/backend/pkg/logger"
@@ -24,14 +25,14 @@ type PluginConfig struct {
 	Author      string `json:"author,omitempty"`
 
 	// 插件设置
-	Settings map[string]any `json:"settings"`
+	Settings map[string]any `json:"settings,omitempty"`
 
 	// UI配置
-	UI pluginsdk.UIConfig `json:"ui"`
+	UI *pluginsdk.UIConfig `json:"ui,omitempty"`
 
 	// 插件状态
-	Enabled bool `json:"enabled"`
-
+	Enabled  bool `json:"enabled"`
+	TestData any  `json:"test_data,omitempty"`
 	// 插件文件信息
 	PluginFile string `json:"plugin_file"` // .so 文件名
 	ConfigFile string `json:"config_file"` // plugin.json 文件路径
@@ -341,26 +342,32 @@ func (m *Manager) GetPluginList() []PluginInfo {
 			Description: loadedPlugin.Config.Description,
 			Author:      loadedPlugin.Config.Author,
 			Enabled:     loadedPlugin.Config.Enabled,
-			LoadedAt:    loadedPlugin.LoadedAt.Format(time.RFC3339),
+			LoadedAt:    loadedPlugin.LoadedAt.UnixMilli(),
 			UI:          loadedPlugin.Config.UI,
 			Settings:    loadedPlugin.Config.Settings,
+			TestData:    loadedPlugin.Config.TestData,
 		}
 
 		list = append(list, info)
 	}
+
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Name < list[j].Name
+	})
 
 	return list
 }
 
 // PluginInfo 插件信息结构（用于API返回）
 type PluginInfo struct {
-	ID          string             `json:"id"`
-	Name        string             `json:"name"`
-	Version     string             `json:"version"`
-	Description string             `json:"description"`
-	Author      string             `json:"author,omitempty"`
-	Enabled     bool               `json:"enabled"`
-	LoadedAt    string             `json:"loadedAt"`
-	UI          pluginsdk.UIConfig `json:"ui"`
-	Settings    map[string]any     `json:"settings"`
+	ID          string              `json:"id"`
+	Name        string              `json:"name"`
+	Version     string              `json:"version"`
+	Description string              `json:"description"`
+	Author      string              `json:"author,omitempty"`
+	Enabled     bool                `json:"enabled"`
+	LoadedAt    int64               `json:"loadedAt"`
+	UI          *pluginsdk.UIConfig `json:"ui"`
+	Settings    map[string]any      `json:"settings"`
+	TestData    any                 `json:"test_data"`
 }

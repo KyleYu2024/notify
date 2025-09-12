@@ -72,8 +72,17 @@
                   <span v-else class="text-body-2 text-medium-emphasis">未配置通知服务</span>
                 </div>
 
-                <!-- 模板信息 -->
-                <div v-if="app.templateId" class="mb-3">
+                <!-- 插件信息（优先展示） -->
+                <div v-if="app.pluginId" class="mb-3">
+                  <div class="text-body-2 text-medium-emphasis mb-1">插件:</div>
+                  <v-chip size="small" variant="tonal" color="secondary">
+                    <v-icon icon="mdi-puzzle" class="mr-1" size="small"></v-icon>
+                    {{ app.pluginId }}
+                  </v-chip>
+                </div>
+
+                <!-- 模板信息（仅在未配置插件时显示） -->
+                <div v-else-if="app.templateId" class="mb-3">
                   <div class="text-body-2 text-medium-emphasis mb-1">消息模板:</div>
                   <v-chip size="small" variant="tonal" color="primary">
                     <v-icon icon="mdi-file-document" class="mr-1" size="small"></v-icon>
@@ -150,14 +159,17 @@ import TestNotificationDialog from '@/components/dialog/TestNotificationDialog.v
 import { useAppsStore } from '@/store/apps'
 import { useNotifiersStore } from '@/store/notifiers'
 import { useTemplatesStore } from '@/store/templates'
+import { usePluginsStore } from '@/store/plugins'
 import { computed, onMounted, ref } from 'vue'
 import { useConfirm } from 'vuetify-use-dialog'
 import { copyToClipboard, getCurrentBaseUrl } from '@/common/utils'
 import { useToast } from 'vue-toast-notification'
+import type { NotificationApp } from '@/common/types'
 
 const appsStore = useAppsStore()
 const notifiersStore = useNotifiersStore()
 const templatesStore = useTemplatesStore()
+const pluginsStore = usePluginsStore()
 const createConfirm = useConfirm()
 const toast = useToast()
 
@@ -172,9 +184,9 @@ const showTestDialog = ref(false)
 const showHelpDialog = ref(false)
 
 // 编辑状态
-const editingApp = ref<any>(null)
+const editingApp = ref<NotificationApp | null>(null)
 
-const testingApp = ref<any>(null)
+const testingApp = ref<NotificationApp | null>(null)
 
 // 计算属性
 const appsList = computed(() => {
@@ -188,24 +200,25 @@ const loadApps = async () => {
   await Promise.all([
     appsStore.fetchApps(),
     notifiersStore.fetchNotifiers(),
-    templatesStore.fetchTemplates()
+    templatesStore.fetchTemplates(),
+    pluginsStore.fetchList(),
   ])
 }
 
 // 编辑应用
-const editApp = (app: any) => {
+const editApp = (app: NotificationApp) => {
   editingApp.value = app
   showCreateDialog.value = true
 }
 
 // 测试应用
-const testApp = (app: any) => {
+const testApp = (app: NotificationApp) => {
   testingApp.value = app
   showTestDialog.value = true
 }
 
 // 复制通知地址
-const copyNotifyUrl = async (app: any) => {
+const copyNotifyUrl = async (app: NotificationApp) => {
   const baseUrl = getCurrentBaseUrl()
   const notifyUrl = `${baseUrl}/api/v1/notify/${app.appId}`
 
@@ -218,7 +231,7 @@ const copyNotifyUrl = async (app: any) => {
 }
 
 // 删除应用
-const deleteApp = async (app: any) => {
+const deleteApp = async (app: NotificationApp) => {
   const isConfirmed = await createConfirm({
     title: '确认删除',
     content: `您确定要删除应用 "${app.name}" 吗？此操作不可撤销。`,

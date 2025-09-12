@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"emby-plugin/internal/emby"
+	"emby-plugin/internal/log"
 	"emby-plugin/internal/models"
 	"fmt"
 	"strings"
@@ -15,12 +16,15 @@ func (p *EmbyPlugin) buildImage(evt models.EmbyEvent, settings models.Settings) 
 	if id == "" {
 		return ""
 	}
-	imageSource := strings.ToLower(strings.TrimSpace(settings.ImageSource)) // nas | tmdb | remote
+	imageSource := strings.ToLower(strings.TrimSpace(settings.ImageSource)) // nas | remote
 	if imageSource == "remote" {
 		emby := emby.NewEmby(settings.EmbyBaseURL, settings.EmbyAPIKey)
+		log.Logger.Info("获取远程图片", "id", id, "Backdrop", "Backdrop")
 		image, err := emby.FetchEmbyRemoteImageURL(id, "Backdrop")
 		if err == nil {
 			return image
+		} else {
+			log.Logger.Error("获取远程图片失败", "error", err)
 		}
 	}
 	base := strings.TrimRight(settings.EmbyBaseURL, "/")

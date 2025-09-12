@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"emby-plugin/internal/log"
 	"emby-plugin/internal/plugin"
 	"emby-plugin/internal/pluginsdk"
 
@@ -13,10 +14,13 @@ import (
 )
 
 func NewPlugin() (pluginsdk.Plugin, error) {
+	log.InitLogger()
 	return &plugin.EmbyPlugin{}, nil
 }
 
-func main() { test() }
+func main() {
+	// test()
+}
 
 func test() {
 	p, err := NewPlugin()

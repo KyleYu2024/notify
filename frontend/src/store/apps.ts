@@ -2,33 +2,9 @@ import { defineStore } from 'pinia'
 import http from '@/common/axiosConfig'
 import { ref } from 'vue'
 import { useToast } from 'vue-toast-notification'
+import type { NotificationApp } from '@/common/types'
 
 const toast = useToast()
-
-interface FieldMapping {
-  title?: string
-  content?: string
-  image?: string
-  url?: string
-  level?: string
-}
-
-interface AppAuth {
-  enabled: boolean
-  token: string
-}
-
-interface NotificationApp {
-  appId: string
-  name: string
-  description?: string
-  enabled: boolean
-  notifiers: string[]
-  templateId: string
-  defaultImage?: string
-  auth?: AppAuth
-  fieldMapping?: FieldMapping
-}
 
 export const useAppsStore = defineStore('apps', () => {
   // 状态

@@ -134,6 +134,8 @@ func convertOutput(v any) (*Output, error) {
 					res.Targets[j] = val.Index(j).String()
 				}
 			}
+		case "IsNotify":
+			res.IsNotify = val.Bool()
 		case "Meta":
 			if !val.IsNil() {
 				meta, err := convertMeta(val.Interface())

@@ -25,6 +25,7 @@ func (p *EmbyPlugin) buildContent(evt models.EmbyEvent, settings models.Settings
 		b.WriteString(evt.User.Name)
 		b.WriteString("\n")
 	}
+
 	if evt.Session != nil {
 		dev := strings.TrimSpace(evt.Session.DeviceName)
 		cli := strings.TrimSpace(evt.Session.Client)
@@ -58,7 +59,6 @@ func (p *EmbyPlugin) buildContent(evt models.EmbyEvent, settings models.Settings
 			b.WriteString(fmt.Sprintf("%.1f%%", pct))
 			b.WriteString("\n")
 		}
-		b.WriteString("\n")
 	}
 
 	b.WriteString(p.buildEpisodeInfo(evt))

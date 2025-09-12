@@ -24,15 +24,14 @@ var (
 )
 
 const (
-	appVersion = "1.0.0"
-	appName    = "notify"
+	appName = "notify"
 )
 
 func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Printf("%s version %s\n", appName, appVersion)
+		fmt.Printf("%s version %s\n", appName, config.EnvCfg.VERSION)
 		return
 	}
 	fmt.Println("当前Go版本:", runtime.Version())

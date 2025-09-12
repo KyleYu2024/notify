@@ -8,6 +8,14 @@ export CONFIG_FILE=".config/config.yaml"
 plugins_dir="./plugins"
 fail=0
 
+# 解析参数，支持 debug 模式
+DEBUG_MODE=0
+for arg in "$@"; do
+    if [ "$arg" = "debug" ] || [ "$arg" = "--debug" ] || [ "$arg" = "-d" ]; then
+        DEBUG_MODE=1
+    fi
+done
+
 for plugin_path in "$plugins_dir"/*; do
     if [ -d "$plugin_path" ] && [ -f "$plugin_path/plugin.go" ]; then
         plugin_name=$(basename "$plugin_path")
@@ -15,7 +23,13 @@ for plugin_path in "$plugins_dir"/*; do
         (
             cd "$plugin_path" && \
             rm -f ./*.so && \
-            go build -gcflags="all=-N -l" -buildmode=plugin -o ./plugin.so ./plugin.go
+            if [ "$DEBUG_MODE" -eq 1 ]; then \
+                echo "使用 debug 模式构建" 
+                go build -gcflags="all=-N -l" -buildmode=plugin -o ./plugin.so ./plugin.go; \
+            else \
+                echo "使用 release 模式构建"
+                go build -buildmode=plugin -o ./plugin.so ./plugin.go; \
+            fi
         )
         if [ $? -ne 0 ]; then
             echo "构建失败: $plugin_name"

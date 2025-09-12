@@ -58,9 +58,10 @@ func (s *HTTPServer) handleGetPlugin(c *gin.Context) {
 		Description: loadedPlugin.Config.Description,
 		Author:      loadedPlugin.Config.Author,
 		Enabled:     loadedPlugin.Config.Enabled,
-		LoadedAt:    loadedPlugin.LoadedAt.Format("2006-01-02T15:04:05Z07:00"),
+		LoadedAt:    loadedPlugin.LoadedAt.UnixMilli(),
 		UI:          loadedPlugin.Config.UI,
 		Settings:    loadedPlugin.Config.Settings,
+		TestData:    loadedPlugin.Config.TestData,
 	}
 
 	c.JSON(http.StatusOK, NewSuccessRes(pluginInfo))

@@ -7,6 +7,7 @@ import (
 	"emby-plugin/internal/pluginsdk"
 	util "emby-plugin/utils"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -44,6 +45,9 @@ func (p *EmbyPlugin) DefaultSettings() map[string]any {
 }
 
 func (p *EmbyPlugin) Process(ctx context.Context, input map[string]any, settings map[string]any) (*pluginsdk.Output, error) {
+	log.Logger.Info("处理Emby事件", "input", input, "settings", settings)
+	isNotify := true
+
 	var evt models.EmbyEvent
 	decCfg := &mapstructure.DecoderConfig{Result: &evt, TagName: "mapstructure"}
 	decoder, err := mapstructure.NewDecoder(decCfg)
@@ -59,11 +63,26 @@ func (p *EmbyPlugin) Process(ctx context.Context, input map[string]any, settings
 		return nil, fmt.Errorf("设置解码失败: %w", err)
 	}
 
+	notifyEmbyUsers := cfg.NotifyEmbyUsers
+	if notifyEmbyUsers != "" {
+		users := strings.Split(notifyEmbyUsers, ",")
+		if len(users) > 0 {
+			isHave := false
+			for _, user := range users {
+				if user == evt.User.Name {
+					isHave = true
+					break
+				}
+			}
+			isNotify = isHave
+		}
+	}
 	title := p.buildTitle(evt)
 	content := p.buildContent(evt, cfg)
 	image := p.buildImage(evt, cfg)
 	url := p.buildURL(evt, cfg)
 	targets := util.ParseTargets(cfg.Targets)
-	output := &pluginsdk.Output{Title: title, Content: content, Image: image, URL: url, Targets: targets, Meta: &pluginsdk.MetaData{Req: input, PluginID: p.ID(), ProcessedAt: time.Now().Format(time.RFC3339)}}
+	output := &pluginsdk.Output{IsNotify: isNotify, Title: title, Content: content, Image: image, URL: url, Targets: targets, Meta: &pluginsdk.MetaData{Req: input, PluginID: p.ID(), ProcessedAt: time.Now().Format(time.RFC3339)}}
+	log.Logger.Info("处理Emby事件完成", "output", output)
 	return output, nil
 }

@@ -347,6 +347,10 @@ func (app *NotificationApp) sendWithPlugin(ctx context.Context, appConfig config
 
 	// 使用插件处理数据
 	output, err := app.pluginManager.ProcessChain(ctx, appConfig.PluginID, *req)
+	if !output.IsNotify {
+		logger.Info("插件结果不需要通知")
+		return nil
+	}
 	if err != nil {
 		return fmt.Errorf("插件处理失败: %w", err)
 	}

@@ -33,6 +33,8 @@ type Output struct {
 
 	// 元数据信息
 	Meta *MetaData `json:"meta"`
+	// 是否需要通知
+	IsNotify bool `json:"isNotify"`
 }
 
 // MetaData 元数据结构
@@ -54,4 +56,13 @@ type MetaData struct {
 type NewFunc func() (Plugin, error)
 
 // UIConfig UI配置结构
-type UIConfig any
+
+type UIConfig struct {
+	Component string     `json:"component"`
+	Text      string     `json:"text"`
+	Html      string     `json:"html"`
+	Content   []UIConfig `json:"content"`
+	// map[string]UIConfig || UIConfig
+	Slots any `json:"slots"`
+	Props any `json:"props"`
+}
