@@ -64,7 +64,7 @@ func (p *EmbyPlugin) Process(ctx context.Context, input map[string]any, settings
 	}
 
 	notifyEmbyUsers := cfg.NotifyEmbyUsers
-	if notifyEmbyUsers != "" {
+	if notifyEmbyUsers != "" && evt.User != nil && strings.TrimSpace(evt.User.Name) != "" {
 		users := strings.Split(notifyEmbyUsers, ",")
 		if len(users) > 0 {
 			isHave := false

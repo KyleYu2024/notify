@@ -84,8 +84,8 @@ VOLUME /config
 # 从后端构建阶段复制二进制文件
 COPY --from=backend-builder /app/notify .
 
-# 复制精简后的插件目录（仅 setting.json 和 .so）
-COPY --from=backend-builder /app/plugins-dist /app/plugins
+# 复制精简后的插件目录到镜像种子目录（仅 setting.json 和 .so）
+COPY --from=backend-builder /app/plugins-dist /opt/plugins-dist
 
 # 从前端构建阶段复制静态文件
 COPY --from=frontend-builder /app/dist /app/static

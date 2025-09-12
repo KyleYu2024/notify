@@ -304,7 +304,7 @@ func (app *NotificationApp) parseFeishuConfig(configData map[string]interface{})
 // InitPlugins 初始化插件系统
 func (app *NotificationApp) InitPlugins() {
 	// 创建插件管理器，插件目录为 plugins（相对于运行目录）
-	app.pluginManager = pluginmgr.NewManager("plugins")
+	app.pluginManager = pluginmgr.NewManager(config.EnvCfg.PLUGINS_DIR)
 
 	// 加载所有插件
 	if err := app.pluginManager.LoadAll(); err != nil {
