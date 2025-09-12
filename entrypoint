@@ -59,9 +59,9 @@ umask "${UMASK}"
 
 echo "Starting notification service as notify user (${PUID}:${PGID})"
 
-# 按需同步内置插件到可写目录 /app/plugins
+# 按需同步内置插件到可写目录
 SEED_DIR="/opt/plugins-dist"
-TARGET_DIR="/app/plugins"
+TARGET_DIR="${PLUGINS_DIR:-/app/plugins}"
 if [ -d "$SEED_DIR" ]; then
     if [ ! -d "$TARGET_DIR" ]; then
         echo "Creating plugins directory: $TARGET_DIR"
@@ -77,13 +77,14 @@ if [ -d "$SEED_DIR" ]; then
         dst="$TARGET_DIR/$name"
         mkdir -p "$dst"
         # 仅复制 setting.json 与 *.so，且仅在目标缺失时复制
-        for f in setting.json *.so; do
-            if [ -f "$src/$f" ]; then
-                if [ ! -f "$dst/$f" ]; then
-                    echo "  -> install $name/$f"
-                    cp "$src/$f" "$dst/"
-                    chown notify:notify "$dst/$f"
-                    chmod 644 "$dst/$f"
+        for f in "$src"/setting.json "$src"/*.so; do
+            if [ -f "$f" ]; then
+                base=$(basename "$f")
+                if [ ! -f "$dst/$base" ]; then
+                    echo "  -> install $name/$base"
+                    cp "$f" "$dst/"
+                    chown notify:notify "$dst/$base"
+                    chmod 644 "$dst/$base"
                 fi
             fi
         done

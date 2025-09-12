@@ -15,7 +15,7 @@ type EnvConfig struct {
 	CONFIG_FILE     string `default:"config/config.yaml"`
 	PORT            string `default:":8088"`
 	STATIC_DIR      string `default:"/app/static"`
-	PLUGINS_DIR     string `default:"/app/plugins"`
+	PLUGINS_DIR     string `default:"/config/plugins"`
 }
 
 func NewEnvConfig() *EnvConfig {

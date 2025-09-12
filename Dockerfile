@@ -107,6 +107,7 @@ ENV LOG_FORMAT=text
 ENV STATIC_DIR=/app/static
 ENV NOTIFY_USERNAME=
 ENV NOTIFY_PASSWORD=
+ENV PLUGINS_DIR=/config/plugins
 
 # 启动应用
 ENTRYPOINT ["/app/entrypoint" ]
