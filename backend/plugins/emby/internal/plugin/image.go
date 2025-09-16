@@ -19,9 +19,9 @@ func (p *EmbyPlugin) buildImage(evt models.EmbyEvent, settings models.Settings) 
 	imageSource := strings.ToLower(strings.TrimSpace(settings.ImageSource)) // nas | remote
 	if imageSource == "remote" {
 		emby := emby.NewEmby(settings.EmbyBaseURL, settings.EmbyAPIKey)
-		log.Logger.Info("获取远程图片", "id", id, "Backdrop", "Backdrop")
+		log.Logger.Info("获取远程图片", "id", id)
 		image, err := emby.FetchEmbyRemoteImageURL(id, "Backdrop")
-		if err == nil {
+		if err == nil && image != "" {
 			return image
 		} else {
 			log.Logger.Error("获取远程图片失败", "error", err)

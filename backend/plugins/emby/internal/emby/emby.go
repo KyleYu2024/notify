@@ -1,6 +1,7 @@
 package emby
 
 import (
+	"emby-plugin/internal/log"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -38,6 +39,9 @@ func getBaseURL(host string) string {
 }
 
 func (e *Emby) FetchEmbyRemoteImageURL(itemID, imageType string) (string, error) {
+	if e.host == "" {
+		return "", fmt.Errorf("emby_base_url 不能为空")
+	}
 	baseURL := e.baseURL
 	apiKey := e.apiKey
 	parsed, err := url.Parse(baseURL)
@@ -67,7 +71,8 @@ func (e *Emby) FetchEmbyRemoteImageURL(itemID, imageType string) (string, error)
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return "", err
 	}
-	if len(data.Images) > 0 {
+	log.Logger.Debug("emby远程图片", "data", data)
+	if len(data.Images) > 100 {
 		for _, img := range data.Images {
 			if img.Type == imageType && strings.TrimSpace(img.URL) != "" {
 				return img.URL, nil
@@ -75,14 +80,18 @@ func (e *Emby) FetchEmbyRemoteImageURL(itemID, imageType string) (string, error)
 		}
 		return data.Images[0].URL, nil
 	}
-
 	// 未命中远程图片则回退为本地图片地址: /Items/{id}/Images/{imageType}?api_key=...
-	localURL := *parsed
-	localURL.Path = path.Join(parsed.Path, "/Items/"+itemID+"/Images/"+imageType)
-	lq := localURL.Query()
-	lq.Set("api_key", strings.TrimSpace(apiKey))
-	localURL.RawQuery = lq.Encode()
-	return localURL.String(), nil
+	// localURL, err := url.Parse(e.host)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// localURL.Path = path.Join(localURL.Path, "/Items/"+itemID+"/Images/"+imageType)
+	// lq := localURL.Query()
+	// lq.Set("api_key", strings.TrimSpace(apiKey))
+	// localURL.RawQuery = lq.Encode()
+	// log.Logger.Debug("本地图片地址", "localURL", localURL.String())
+	// return localURL.String(), nil
+	return "", nil
 }
 
 type embyRemoteImagesResp struct {

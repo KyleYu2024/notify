@@ -40,7 +40,7 @@ func (p *EmbyPlugin) buildEpisodeInfo(evt models.EmbyEvent) string {
 		sb.WriteString("📺 剧集:")
 		item := evt.Item
 		if item.SeriesName != "" && item.IndexNumber > 0 && item.ParentIndexNumber > 0 {
-			sb.WriteString(fmt.Sprintf("%s 第%d季 第%d集", item.SeriesName, item.IndexNumber, item.ParentIndexNumber))
+			sb.WriteString(fmt.Sprintf("%s 第%d季 第%d集", item.SeriesName, item.ParentIndexNumber, item.IndexNumber))
 		} else if item.SeriesName != "" {
 			sb.WriteString(item.SeriesName)
 			if item.SeasonName != "" {
