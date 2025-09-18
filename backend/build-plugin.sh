@@ -5,6 +5,9 @@ export CGO_ENABLED=1
 export PORT="8088"
 export CONFIG_FILE=".config/config.yaml"
 
+# Go版本配置 - 用于Docker编译环境
+GO_VERSION="1.25.1"
+
 plugins_dir="./plugins"
 fail=0
 
@@ -55,6 +58,21 @@ show_help() {
     echo ""
     echo "参数:"
     echo "  插件名                 指定要构建的插件名称（可选，不指定则构建所有插件）"
+    echo ""
+    echo "交叉编译要求:"
+    echo "  由于插件需要CGO支持，交叉编译需要安装相应的工具链："
+    echo "  Linux AMD64:  需要 x86_64-linux-gnu-gcc 或 Docker"
+    echo "  Linux ARM64:  需要 aarch64-linux-gnu-gcc 或 Docker"
+    echo "  Darwin目标:   只能在 macOS 系统上编译"
+    echo ""
+    echo "  macOS 安装交叉编译工具链："
+    echo "    brew install x86_64-elf-gcc      # Linux AMD64"
+    echo "    brew install aarch64-elf-gcc     # Linux ARM64"
+    echo "  或者确保安装了 Docker 来使用容器编译"
+    echo ""
+    echo "配置说明:"
+    echo "  可以通过修改脚本顶部的 GO_VERSION 变量来更改Docker镜像的Go版本"
+    echo "  当前设置: golang:${GO_VERSION}-alpine"
     echo ""
     echo "示例:"
     echo "  $0                    # 构建所有插件的所有平台版本"
@@ -140,10 +158,88 @@ build_plugin() {
     
     (
         cd "$plugin_path" && \
+        # 在设置环境变量之前获取当前平台信息
+        local current_goos=$(go env GOOS)
+        local current_goarch=$(go env GOARCH)
         export GOOS="$goos" && \
         export GOARCH="$goarch" && \
         local output_name="plugin-${platform}.so"
         rm -f "./$output_name" && \
+        
+        # 检查是否为交叉编译
+        if [ "$goos" != "$current_goos" ] || [ "$goarch" != "$current_goarch" ]; then
+            echo "    检测到交叉编译 ($current_goos/$current_goarch -> $goos/$goarch)"
+            
+            # 根据目标平台设置编译器
+            case "$goos-$goarch" in
+                "linux-amd64")
+                    if command -v x86_64-linux-gnu-gcc >/dev/null 2>&1; then
+                        export CC=x86_64-linux-gnu-gcc
+                        export CXX=x86_64-linux-gnu-g++
+                        echo "    使用 x86_64-linux-gnu-gcc 编译器"
+                    else
+                        echo "    警告: 未找到 x86_64-linux-gnu-gcc，尝试使用 Docker 编译..."
+                        # 使用Docker编译
+                        if command -v docker >/dev/null 2>&1; then
+                            docker run --rm \
+                                -v "$(pwd)":/workspace \
+                                -w /workspace \
+                                golang:${GO_VERSION}-alpine \
+                                sh -c "apk add --no-cache git ca-certificates build-base pkgconfig && \
+                                       go build -buildmode=plugin -o $output_name ./plugin.go"
+                            return $?
+                        else
+                            echo "    错误: 需要安装 Docker 或 x86_64-linux-gnu-gcc 来进行交叉编译"
+                            return 1
+                        fi
+                    fi
+                    ;;
+                "linux-arm64")
+                    if command -v aarch64-linux-gnu-gcc >/dev/null 2>&1; then
+                        export CC=aarch64-linux-gnu-gcc
+                        export CXX=aarch64-linux-gnu-g++
+                        echo "    使用 aarch64-linux-gnu-gcc 编译器"
+                    else
+                        echo "    警告: 未找到 aarch64-linux-gnu-gcc，尝试使用 Docker 编译..."
+                        if command -v docker >/dev/null 2>&1; then
+                            docker run --rm \
+                                -v "$(pwd)":/workspace \
+                                -w /workspace \
+                                --platform linux/arm64 \
+                                golang:${GO_VERSION}-alpine \
+                                sh -c " git ca-certificates build-base pkgconfig && \
+                                       go build -buildmode=plugin -o $output_name ./plugin.go"
+                            return $?
+                        else
+                            echo "    错误: 需要安装 Docker 或 aarch64-linux-gnu-gcc 来进行交叉编译"
+                            return 1
+                        fi
+                    fi
+                    ;;
+                "darwin-arm64")
+                    if [ "$current_goos" = "darwin" ]; then
+                        echo "    在 macOS 上交叉编译 ARM64"
+                    else
+                        echo "    错误: 无法在非 macOS 系统上编译 Darwin 目标"
+                        return 1
+                    fi
+                    ;;
+                "darwin-amd64")
+                    if [ "$current_goos" = "darwin" ]; then
+                        echo "    在 macOS 上交叉编译 AMD64"
+                    else
+                        echo "    错误: 无法在非 macOS 系统上编译 Darwin 目标"
+                        return 1
+                    fi
+                    ;;
+                *)
+                    echo "    警告: 未配置的平台组合 $goos/$goarch"
+                    ;;
+            esac
+        else
+            echo "    本地平台构建"
+        fi
+        
         if [ "$DEBUG_MODE" -eq 1 ]; then \
             go build -gcflags="all=-N -l" -buildmode=plugin -o "./$output_name" ./plugin.go; \
         else \
