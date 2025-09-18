@@ -23,8 +23,9 @@ export interface NotificationApp {
   enabled: boolean
   notifiers: string[]
   templateId: string
+  pluginId?: string
   defaultImage?: string
-  auth?: AppAuth
+  auth: AppAuth
   fieldMapping?: FieldMapping
 }
 

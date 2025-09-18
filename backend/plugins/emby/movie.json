@@ -1,0 +1,126 @@
+{
+    "Date": "2025-08-01T06:15:32.6673501Z",
+    "Description": "2025年8月1日星期五 下午2:15",
+    "Event": "playback.start",
+    "Item": {
+        "BackdropImageTags": [
+            "b923e209b1d3d5c88461a837900ff1dc"
+        ],
+        "Bitrate": 19157626,
+        "CommunityRating": 6.708,
+        "Container": "mkv",
+        "DateCreated": "2025-05-08T13:43:30.0000000Z",
+        "ExternalUrls": [
+            {
+                "Name": "IMDb",
+                "Url": "https://www.imdb.com/title/tt9272572"
+            },
+            {
+                "Name": "MovieDb",
+                "Url": "https://www.themoviedb.org/movie/551115"
+            },
+            {
+                "Name": "Trakt",
+                "Url": "https://trakt.tv/search/tmdb/551115?id_type=movie"
+            }
+        ],
+        "FileName": "黑寡妇 (2021) - 2160p.strm",
+        "GenreItems": [
+            {
+                "Id": 67,
+                "Name": "动作"
+            },
+            {
+                "Id": 604,
+                "Name": "犯罪"
+            },
+            {
+                "Id": 782,
+                "Name": "惊悚"
+            },
+            {
+                "Id": 557,
+                "Name": "剧情"
+            }
+        ],
+        "Genres": [
+            "动作",
+            "犯罪",
+            "惊悚",
+            "剧情"
+        ],
+        "Height": 2160,
+        "Id": "59485",
+        "ImageTags": {
+            "Art": "f7a01c4ea3c4c7d38c0efa271a2705ec",
+            "Banner": "686c3fd4e758c272dc9515fc31608fc9",
+            "Disc": "439bf996622df926591e433bfd97b08c",
+            "Logo": "9812f55c07897af52f1e0b0d77387d81",
+            "Primary": "cc14fa06429fca7f10bd237c7e015af6",
+            "Thumb": "7292f2e57dab3c59d0134dc0d95adf56"
+        },
+        "IsFolder": false,
+        "MediaType": "Video",
+        "Name": "黑寡妇：最终章",
+        "OriginalTitle": "Penoza: The Final Chapter",
+        "Overview": "一次疏忽，让她的行踪外洩，家人因此饱受威胁…频频被恶梦吓醒的玛丽亚，远离家人已两年，为了瞭解儿女的最新状况，她冒险打给母亲，以解思念之情，直到某晚，吉米带人持枪上门找碴，蒂娜惨遭枪击，性命垂危，玛丽亚为救蒂娜而被警方逮捕，警方一按指纹发现她竟是“早已身亡”的黑寡妇卡门？！新闻大肆报导，仇家与家人皆知她未死，她将如何保护家人安危呢？！",
+        "ParentId": "59484",
+        "Path": "/strm/disk/media/movie/foreign/黑寡妇 (2021)/黑寡妇 (2021) - 2160p.strm",
+        "PremiereDate": "2019-11-27T16:00:00.0000000Z",
+        "PrimaryImageAspectRatio": 0.6666666666666666,
+        "ProductionYear": 2019,
+        "ProviderIds": {
+            "Imdb": "tt9272572",
+            "Tmdb": "551115"
+        },
+        "RemoteTrailers": [
+            {
+                "Url": "https://www.youtube.com/watch?v=wffnOZ6kEb8"
+            }
+        ],
+        "RunTimeTicks": 80267690000,
+        "ServerId": "f54fd297966f47a9af251f94e671f126",
+        "Size": 19221730271,
+        "SortName": "黑寡妇：最终章",
+        "Studios": [
+            {
+                "Id": 59523,
+                "Name": "NL Film en TV"
+            },
+            {
+                "Id": 59524,
+                "Name": "KRO-NCRV"
+            }
+        ],
+        "TagItems": [],
+        "Taglines": [
+            "The Black Widow is not dead ... and she have to deal with her past to save her family."
+        ],
+        "Type": "Movie",
+        "Width": 3840
+    },
+    "PlaybackInfo": {
+        "PlaySessionId": "f9880d4c93b34301a980e21be7ce94a2",
+        "PlaylistIndex": 0,
+        "PlaylistLength": 1,
+        "PositionTicks": 0
+    },
+    "Server": {
+        "Id": "asdfasdfasdf",
+        "Name": "test-aaa",
+        "Version": "4.8.11.0"
+    },
+    "Session": {
+        "ApplicationVersion": "5.6.4",
+        "Client": "SenPlayer",
+        "DeviceId": "D0082EFC-2BB7-438F-9652-B4F108AB9CA5",
+        "DeviceName": "iPhone",
+        "Id": "65b9eb49462e58eb8193de6c9d3a6e4e",
+        "RemoteEndPoint": "111.111.111.111"
+    },
+    "Title": "admin 在 iPhone 上开始播放 黑寡妇：最终章",
+    "User": {
+        "Id": "13123123sdfasf",
+        "Name": "admin"
+    }
+}

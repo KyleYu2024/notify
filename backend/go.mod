@@ -1,11 +1,12 @@
-module notify
+module github.com/jianxcao/notify/backend
 
-go 1.21
+go 1.24.2
 
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/larksuite/oapi-sdk-go/v3 v3.4.22
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -20,7 +21,6 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
-	github.com/larksuite/oapi-sdk-go/v3 v3.4.22 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

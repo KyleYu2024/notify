@@ -65,6 +65,15 @@ const router = createRouter({
             title: '日志',
           },
         },
+        {
+          path: '/plugins',
+          name: 'Plugins',
+          component: () => import('@/pages/PluginsPage.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '插件管理',
+          },
+        },
       ],
     },
     {

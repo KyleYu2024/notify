@@ -50,8 +50,16 @@
                 item-value="key" multiple chips :rules="[rules.required]"></v-select>
             </v-col>
             <v-col cols="12" md="6">
+              <v-select v-model="form.pluginId" label="插件（可选）" :items="pluginOptions" item-title="name" item-value="id"
+                clearable hint="配置了插件后，模板将不生效" persistent-hint></v-select>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12" md="6">
               <v-select v-model="form.templateId" label="消息模板 *" :items="templatesStore.getTemplateOptions()"
-                item-title="title" item-value="value" :rules="[rules.required]"></v-select>
+                item-title="title" item-value="value" :rules="form.pluginId ? [] : [rules.required]"
+                :disabled="!!form.pluginId" hint="当选择了插件时，模板将被禁用" persistent-hint></v-select>
             </v-col>
           </v-row>
 
@@ -77,20 +85,8 @@
 import { ref, computed, watch, defineProps, defineEmits } from 'vue'
 import { useNotifiersStore } from '@/store/notifiers'
 import { useTemplatesStore } from '@/store/templates'
-
-interface AppData {
-  appId: string
-  name: string
-  description: string
-  enabled: boolean
-  notifiers: string[]
-  templateId: string
-  defaultImage: string
-  auth: {
-    enabled: boolean
-    token: string
-  }
-}
+import { usePluginsStore } from '@/store/plugins'
+import type { NotificationApp } from '@/common/types'
 
 interface Props {
   modelValue: boolean
@@ -99,7 +95,7 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'save', appData: AppData): void
+  (e: 'save', appData: NotificationApp): void
   (e: 'cancel'): void
 }
 const dialogVisible = defineModel<boolean>()
@@ -111,19 +107,21 @@ const emit = defineEmits<Emits>()
 
 const notifiersStore = useNotifiersStore()
 const templatesStore = useTemplatesStore()
+const pluginsStore = usePluginsStore()
 
 // 表单引用和验证状态
 const formRef = ref()
 
 
 // 表单数据
-const form = ref<AppData>({
+const form = ref<NotificationApp>({
   appId: '',
   name: '',
   description: '',
   enabled: true,
   notifiers: [],
   templateId: '',
+  pluginId: '',
   defaultImage: '',
   auth: {
     enabled: false,
@@ -142,6 +140,7 @@ const resetForm = () => {
     enabled: true,
     notifiers: [],
     templateId: '',
+    pluginId: '',
     defaultImage: '',
     auth: {
       enabled: false,
@@ -174,6 +173,11 @@ const notifiersList = computed(() => {
   })).filter(item => item.enabled)
 })
 
+// 插件选项（仅显示已启用插件）
+const pluginOptions = computed(() => {
+  return pluginsStore.list.filter(p => p.enabled).map(p => ({ id: p.id, name: `${p.name} (${p.id})` }))
+})
+
 
 // 监听编辑应用变化
 watch(dialogVisible, (visible) => {
@@ -186,6 +190,7 @@ watch(dialogVisible, (visible) => {
       enabled: app.enabled,
       notifiers: app.notifiers || [],
       templateId: app.templateId,
+      pluginId: app.pluginId || '',
       defaultImage: app.defaultImage || '',
       auth: app.auth ? { ...app.auth } : { enabled: false, token: '' },
     }

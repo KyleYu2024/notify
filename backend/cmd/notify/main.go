@@ -6,14 +6,15 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
 
-	"notify/internal/app"
-	"notify/internal/config"
-	"notify/internal/logger"
-	"notify/internal/server"
+	"github.com/jianxcao/notify/backend/pkg/app"
+	"github.com/jianxcao/notify/backend/pkg/config"
+	"github.com/jianxcao/notify/backend/pkg/logger"
+	"github.com/jianxcao/notify/backend/pkg/server"
 )
 
 var (
@@ -23,18 +24,17 @@ var (
 )
 
 const (
-	appVersion = "1.0.0"
-	appName    = "notify"
+	appName = "notify"
 )
 
 func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Printf("%s version %s\n", appName, appVersion)
+		fmt.Printf("%s version %s\n", appName, config.EnvCfg.VERSION)
 		return
 	}
-
+	fmt.Println("当前Go版本:", runtime.Version())
 	// 获取配置文件路径，优先使用环境变量，如果环境变量没有设置则使用命令行参数
 	var actualConfigFile string
 	if config.EnvCfg.CONFIG_FILE != "" {

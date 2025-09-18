@@ -58,5 +58,38 @@ chown -R notify:notify \
 umask "${UMASK}"
 
 echo "Starting notification service as notify user (${PUID}:${PGID})"
+
+# 按需同步内置插件到可写目录
+SEED_DIR="/opt/plugins-dist"
+TARGET_DIR="${PLUGINS_DIR:-/app/plugins}"
+if [ -d "$SEED_DIR" ]; then
+    if [ ! -d "$TARGET_DIR" ]; then
+        echo "Creating plugins directory: $TARGET_DIR"
+        mkdir -p "$TARGET_DIR"
+        chown -R notify:notify "$TARGET_DIR"
+    fi
+
+    echo "Seeding plugins from $SEED_DIR to $TARGET_DIR (missing only)"
+    for d in "$SEED_DIR"/*; do
+        [ -d "$d" ] || continue
+        name=$(basename "$d")
+        src="$d"
+        dst="$TARGET_DIR/$name"
+        mkdir -p "$dst"
+        # 仅复制 setting.json 与 *.so，且仅在目标缺失时复制
+        for f in "$src"/setting.json "$src"/*.so; do
+            if [ -f "$f" ]; then
+                base=$(basename "$f")
+                if [ ! -f "$dst/$base" ]; then
+                    echo "  -> install $name/$base"
+                    cp "$f" "$dst/"
+                    chown notify:notify "$dst/$base"
+                    chmod 644 "$dst/$base"
+                fi
+            fi
+        done
+    done
+fi
+
 # 启动后端服务
 exec gosu notify:notify /app/notify

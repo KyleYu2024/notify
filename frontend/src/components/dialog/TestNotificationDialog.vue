@@ -3,7 +3,9 @@
     <v-card>
       <v-card-title>测试通知 - {{ app?.name }}</v-card-title>
       <v-card-text>
-        <v-form>
+        <v-textarea v-if="Object.keys(templateTest).length > 0" v-model="templateTest" label="数据" rows="3"
+          class="mb-4"></v-textarea>
+        <v-form v-else>
           <!-- 固定字段 -->
           <v-text-field v-model="form.title" label="标题" class="mb-4"></v-text-field>
           <v-textarea v-model="form.content" label="内容" rows="3" class="mb-4"></v-textarea>
@@ -40,6 +42,8 @@
             <p>暂无动态字段，点击上方按钮添加</p>
           </div>
         </v-form>
+
+
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -51,7 +55,10 @@
 </template>
 
 <script setup lang="ts">
+import type { NotificationApp } from '@/common/types'
+import { usePluginsStore } from '@/store/plugins'
 import { ref, watch, defineProps, defineEmits } from 'vue'
+const pluginsStore = usePluginsStore()
 
 interface CustomField {
   name: string
@@ -68,17 +75,25 @@ interface TestNotificationData {
 }
 
 interface Props {
-  app?: any
+  app?: NotificationApp | null
   loading?: boolean
 }
 
 interface Emits {
-  (e: 'send', data: TestNotificationData): void
+  (e: 'send', data: TestNotificationData | Record<string, any>): void
   (e: 'cancel'): void
 }
 
-withDefaults(defineProps<Props>(), {
+
+const props = withDefaults(defineProps<Props>(), {
   loading: false
+})
+
+const plugin = computed(() => {
+  if (props.app?.pluginId) {
+    return pluginsStore.getById(props.app.pluginId)
+  }
+  return null
 })
 
 const dialogVisible = defineModel<boolean>()
@@ -93,6 +108,8 @@ const form = ref<TestNotificationData>({
   image: '',
   targets: ''
 })
+
+const templateTest = ref<string>('')
 
 // 动态字段
 const customFields = ref<CustomField[]>([])
@@ -120,20 +137,32 @@ watch(dialogVisible, (visible) => {
       image: '',
       targets: ''
     }
+    console.debug(plugin.value)
+    if (plugin.value) {
+      templateTest.value = JSON.stringify(plugin.value?.test_data || {}, null, 2)
+    } else {
+      templateTest.value = ''
+    }
     customFields.value = []
   }
 })
 
 // 处理发送
 const handleSend = () => {
-  const data = {
-    ...form.value,
-    ...customFields.value.filter(field => field.name.trim() !== '' || field.value.trim() !== '').reduce((acc, field) => {
-      acc[field.name] = field.value
-      return acc
-    }, {} as Record<string, string>)
+  if (plugin.value && templateTest.value) {
+    const data = JSON.parse(templateTest.value)
+    emit('send', data)
+    return
+  } else if (form.value) {
+    const data = {
+      ...form.value,
+      ...customFields.value.filter(field => field.name.trim() !== '' || field.value.trim() !== '').reduce((acc, field) => {
+        acc[field.name] = field.value
+        return acc
+      }, {} as Record<string, string>)
+    }
+    emit('send', data)
   }
-  emit('send', data)
 }
 
 // 处理取消

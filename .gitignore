@@ -31,3 +31,5 @@ __debug*
 .config
 
 dev-dist
+
+*.so

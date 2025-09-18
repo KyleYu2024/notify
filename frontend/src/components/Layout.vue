@@ -216,6 +216,12 @@ const menuItems = [
     to: '/templates'
   },
   {
+    title: '插件管理',
+    subtitle: '管理后端插件与设置',
+    icon: 'mdi-puzzle',
+    to: '/plugins'
+  },
+  {
     title: '日志',
     subtitle: '实时查看系统日志',
     icon: 'mdi-math-log',
