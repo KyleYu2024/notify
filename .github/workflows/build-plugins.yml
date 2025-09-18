@@ -1,5 +1,4 @@
 name: Build Plugins
-
 on:
   push:
     branches: ["main"]
@@ -11,195 +10,40 @@ on:
         description: "指定要构建的插件名称（留空则构建全部）"
         required: false
         type: string
-      platforms:
-        description: "目标平台（用逗号分隔，如：darwin-amd64,linux-amd64）"
-        required: false
-        default: "all"
-        type: string
-      debug_mode:
-        description: "启用Debug模式"
-        required: false
-        default: false
-        type: boolean
-
-env:
-  GO_VERSION: "1.25.1"
 
 jobs:
-  build-plugins:
-    name: Build Plugins - ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: "Linux (AMD64 + ARM64)"
-            os: ubuntu-latest
-            platforms: "linux-amd64,linux-arm64"
-          - name: "macOS (Intel + Apple Silicon)"
-            os: macos-latest
-            platforms: "darwin-amd64,darwin-arm64"
-
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: "on"
     steps:
-      - name: Checkout代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 设置Go环境
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: 1.25.1
           check-latest: true
 
-      - name: 检查Go版本
-        run: go version
-
-      - name: 安装构建依赖 (Ubuntu)
-        if: runner.os == 'Linux'
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential
+          docker pull crazymax/xgo:latest
+          go install github.com/crazy-max/xgo@latest
+          sudo apt install upx
 
-      - name: 设置Docker (如果需要)
-        if: runner.os == 'Linux' || runner.os == 'macOS'
+      - name: Build plugins
+        working-directory: backend
         run: |
-          if command -v docker >/dev/null 2>&1; then
-            echo "Docker已安装"
-            docker --version
+          # 根据输入参数构建插件
+          if [ -n "${{ github.event.inputs.plugin_name }}" ]; then
+            ./build-with-xgo.sh "${{ github.event.inputs.plugin_name }}"
           else
-            echo "Docker未安装，某些交叉编译可能会失败"
+            ./build-with-xgo.sh
           fi
 
-      - name: 缓存Go模块
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: 安装插件依赖
-        working-directory: backend
-        run: |
-          # 为每个插件安装依赖
-          find plugins -name "go.mod" -execdir go mod download \;
-
-      - name: 构建插件
-        working-directory: backend
-        run: |
-          chmod +x build-plugin.sh
-
-          # 设置构建参数
-          BUILD_ARGS=""
-
-          # Debug模式
-          if [[ "${{ github.event.inputs.debug_mode }}" == "true" ]]; then
-            BUILD_ARGS="$BUILD_ARGS --debug"
-          fi
-
-          # 平台参数 - 优先使用手动指定的平台，否则使用矩阵中的平台
-          PLATFORMS="${{ github.event.inputs.platforms }}"
-          if [[ -z "$PLATFORMS" || "$PLATFORMS" == "all" ]]; then
-            PLATFORMS="${{ matrix.platforms }}"
-          fi
-          BUILD_ARGS="$BUILD_ARGS --platform $PLATFORMS"
-
-          # 插件名称
-          PLUGIN_NAME="${{ github.event.inputs.plugin_name }}"
-
-          # 执行构建
-          echo "🔧 执行构建命令: ./build-plugin.sh $BUILD_ARGS $PLUGIN_NAME"
-          echo "📋 目标平台: $PLATFORMS"
-          echo "🎯 目标插件: ${PLUGIN_NAME:-'全部插件'}"
-          echo "🔨 构建模式: ${{ github.event.inputs.debug_mode == 'true' && 'Debug' || 'Release' }}"
-          echo ""
-
-          ./build-plugin.sh $BUILD_ARGS $PLUGIN_NAME
-
-      - name: 收集构建产物
-        id: collect-artifacts
-        working-directory: backend
-        run: |
-          mkdir -p ../artifacts
-
-          # 查找所有构建的插件文件
-          find plugins -name "plugin-*.so" -type f | while read file; do
-            # 提取插件名和平台信息
-            plugin_dir=$(dirname "$file")
-            plugin_name=$(basename "$plugin_dir")
-            filename=$(basename "$file")
-            
-            # 创建目标目录
-            target_dir="../artifacts/$plugin_name"
-            mkdir -p "$target_dir"
-            
-            # 复制文件
-            cp "$file" "$target_dir/"
-            echo "收集: $file -> $target_dir/$filename"
-          done
-
-          # 检查是否有构建产物
-          if [ -d "../artifacts" ] && [ "$(ls -A ../artifacts)" ]; then
-            echo "has_artifacts=true" >> $GITHUB_OUTPUT
-            echo "构建产物收集完成"
-            ls -la ../artifacts/
-          else
-            echo "has_artifacts=false" >> $GITHUB_OUTPUT
-            echo "没有找到构建产物"
-          fi
-
-      - name: 上传构建产物
-        if: steps.collect-artifacts.outputs.has_artifacts == 'true'
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: plugins-${{ runner.os }}-${{ github.run_number }}
-          path: artifacts/
+          name: plugins
+          path: backend/plugins/*/plugin-*
           retention-days: 30
-          if-no-files-found: warn
-
-      - name: 显示构建摘要
-        if: always()
-        working-directory: backend
-        run: |
-          echo "## 🔧 插件构建摘要 - ${{ matrix.name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**运行环境**: ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
-          echo "**目标平台**: ${{ matrix.platforms }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Go版本**: ${{ env.GO_VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "**构建模式**: ${{ github.event.inputs.debug_mode == 'true' && 'Debug' || 'Release' }}" >> $GITHUB_STEP_SUMMARY
-          echo "**指定插件**: ${{ github.event.inputs.plugin_name || '全部插件' }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if find plugins -name "plugin-*.so" -type f > /dev/null 2>&1; then
-            echo "### ✅ 构建成功的插件:" >> $GITHUB_STEP_SUMMARY
-            find plugins -name "plugin-*.so" -type f | while read file; do
-              plugin_name=$(basename $(dirname "$file"))
-              filename=$(basename "$file")
-              size=$(ls -lh "$file" | awk '{print $5}')
-              echo "- **$plugin_name**: $filename ($size)" >> $GITHUB_STEP_SUMMARY
-            done
-          else
-            echo "### ❌ 没有成功构建的插件" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  summary:
-    name: 构建摘要
-    runs-on: ubuntu-latest
-    needs: build-plugins
-    if: always()
-    steps:
-      - name: 输出构建结果
-        run: |
-          echo "## 🚀 插件构建完成" 
-          echo ""
-          if [[ "${{ needs.build-plugins.result }}" == "success" ]]; then
-            echo "✅ **状态**: 所有平台构建成功"
-            echo "🎯 **目标**: ${{ github.event.inputs.plugin_name || '全部插件' }}"
-            echo "🏗️ **平台**: 所有支持的平台"
-            echo "📦 **产物**: 已上传至 Actions Artifacts"
-          else
-            echo "❌ **状态**: 构建失败"
-            echo "🔍 **建议**: 请检查上方的构建日志以获取详细错误信息"
-            exit 1
-          fi
