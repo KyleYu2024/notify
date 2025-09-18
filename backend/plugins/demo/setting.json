@@ -10,7 +10,5 @@
     "default_image": "https://test.com/image.png",
     "prefix": "TEST"
   },
-  "enabled": true,
-  "plugin_file": "plugin.so",
-  "config_file": ""
+  "enabled": true
 }

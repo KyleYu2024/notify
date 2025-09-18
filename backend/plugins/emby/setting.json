@@ -507,7 +507,5 @@
       "Id": "13123123sdfasf",
       "Name": "test"
     }
-  },
-  "plugin_file": "plugin.so",
-  "config_file": ""
+  }
 }

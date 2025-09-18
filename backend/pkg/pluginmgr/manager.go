@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"plugin"
 	"reflect"
+	"runtime"
 	"sort"
 	"time"
 
@@ -31,11 +32,9 @@ type PluginConfig struct {
 	UI *pluginsdk.UIConfig `json:"ui,omitempty"`
 
 	// 插件状态
-	Enabled  bool `json:"enabled"`
-	TestData any  `json:"test_data,omitempty"`
-	// 插件文件信息
-	PluginFile string `json:"plugin_file"` // .so 文件名
-	ConfigFile string `json:"config_file"` // plugin.json 文件路径
+	Enabled    bool   `json:"enabled"`
+	TestData   any    `json:"test_data,omitempty"`
+	ConfigFile string `json:"-"` // plugin.json 文件路径
 }
 
 // LoadedPlugin 已加载的插件实例
@@ -60,6 +59,26 @@ func NewManager(pluginsDir string) *Manager {
 		pluginsDir: pluginsDir,
 		plugins:    make(map[string]*LoadedPlugin),
 	}
+}
+
+// findPluginFile 根据当前系统查找合适的插件文件
+func (m *Manager) findPluginFile(pluginDir string) (string, error) {
+	// 构建可能的插件文件名列表，按优先级排序
+	possibleFiles := []string{
+		fmt.Sprintf("plugin-%s-%s.so", runtime.GOOS, runtime.GOARCH), // 当前系统架构
+		"plugin.so", // 通用备用文件
+	}
+
+	// 按优先级查找文件
+	for _, filename := range possibleFiles {
+		fullPath := filepath.Join(pluginDir, filename)
+		if _, err := os.Stat(fullPath); err == nil {
+			logger.Error(fmt.Sprintf("找到适用于系统 %s-%s 的插件文件", runtime.GOOS, runtime.GOARCH), "路径", fullPath)
+			return fullPath, nil
+		}
+	}
+
+	return "", fmt.Errorf("未找到适用于系统 %s-%s 的插件文件", runtime.GOOS, runtime.GOARCH)
 }
 
 // LoadAll 加载所有插件
@@ -119,17 +138,13 @@ func (m *Manager) loadOne(pluginDir string) error {
 	if config.Name == "" {
 		return fmt.Errorf("插件名称不能为空")
 	}
-	if config.PluginFile == "" {
-		return fmt.Errorf("插件文件名不能为空")
-	}
-
 	// 设置完整路径
 	config.ConfigFile = configFile
-	soFile := filepath.Join(pluginDir, config.PluginFile)
 
-	// 检查 .so 文件是否存在
-	if _, err := os.Stat(soFile); os.IsNotExist(err) {
-		return fmt.Errorf("插件文件不存在: %s", soFile)
+	// 查找合适的插件文件
+	soFile, err := m.findPluginFile(pluginDir)
+	if err != nil {
+		return fmt.Errorf("查找插件文件失败: %w", err)
 	}
 
 	// 打开插件
