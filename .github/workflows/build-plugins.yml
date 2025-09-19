@@ -1,9 +1,8 @@
 name: Build Plugins
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    tags:
+      - "plugin@*"
   workflow_dispatch:
     inputs:
       plugin_name:
@@ -41,9 +40,66 @@ jobs:
             ./build-with-xgo.sh
           fi
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Package plugins
+        working-directory: backend/plugins
+        run: |
+          # 为每个插件创建压缩包
+          for plugin_dir in */; do
+            plugin_name=${plugin_dir%/}
+            echo "正在打包插件: $plugin_name"
+            
+            # 创建临时目录
+            mkdir -p "temp_$plugin_name"
+            
+            # 复制插件文件到临时目录
+            cp "$plugin_name"/plugin-*.so "temp_$plugin_name/" 2>/dev/null || true
+            cp "$plugin_name"/setting.json "temp_$plugin_name/" 2>/dev/null || true
+            
+            # 创建压缩包
+            if [ -d "temp_$plugin_name" ] && [ "$(ls -A temp_$plugin_name)" ]; then
+              tar -czf "${plugin_name}.tar.gz" -C "temp_$plugin_name" .
+              echo "成功创建压缩包: ${plugin_name}.tar.gz"
+            fi
+            
+            # 清理临时目录
+            rm -rf "temp_$plugin_name"
+          done
+
+          # 列出创建的压缩包
+          ls -la *.tar.gz
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # 从tag中提取版本号 (plugin@1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF#refs/tags/plugin@}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "提取的版本号: $VERSION"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: plugins
-          path: backend/plugins/*/plugin-*
-          retention-days: 30
+          tag_name: ${{ github.ref_name }}
+          name: "插件包 v${{ steps.extract_version.outputs.version }}"
+          body: |
+            ## 插件包发布 v${{ steps.extract_version.outputs.version }}
+
+            此版本包含以下插件的编译文件：
+
+            ### 包含的插件
+            - 各平台的 `.so` 文件 (Linux/macOS, AMD64/ARM64)
+            - 插件配置文件 `setting.json`
+
+            ### 使用方法
+            1. 下载对应插件的压缩包
+            2. 解压到插件目录
+            3. 重启服务加载插件
+
+            ### 注意事项
+            - 请根据您的系统架构选择对应的 `.so` 文件
+            - 确保 `setting.json` 配置正确
+          files: backend/plugins/*.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
