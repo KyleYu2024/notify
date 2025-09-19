@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"runtime"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/jianxcao/notify/backend/pkg/logger"
@@ -61,24 +62,90 @@ func NewManager(pluginsDir string) *Manager {
 	}
 }
 
+// isMuslSystem 检测当前系统是否使用 musl libc
+func isMuslSystem() bool {
+	// 方法1: 检查 musl 动态链接器文件是否存在
+	muslPaths := []string{
+		"/lib/ld-musl-x86_64.so.1",  // x86_64
+		"/lib/ld-musl-aarch64.so.1", // arm64
+		"/lib/ld-musl-i386.so.1",    // i386
+		"/lib/ld-musl-armhf.so.1",   // armhf
+	}
+
+	for _, path := range muslPaths {
+		if _, err := os.Stat(path); err == nil {
+			return true
+		}
+	}
+
+	// 方法2: 检查 /lib 目录下是否有 ld-musl 开头的文件
+	if files, err := os.ReadDir("/lib"); err == nil {
+		for _, file := range files {
+			if strings.HasPrefix(file.Name(), "ld-musl-") {
+				return true
+			}
+		}
+	}
+
+	// 方法3: 检查 /usr/lib 目录（某些发行版）
+	if files, err := os.ReadDir("/usr/lib"); err == nil {
+		for _, file := range files {
+			if strings.HasPrefix(file.Name(), "ld-musl-") {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 // findPluginFile 根据当前系统查找合适的插件文件
 func (m *Manager) findPluginFile(pluginDir string) (string, error) {
+	// 检测当前系统是否使用 musl
+	isMusl := isMuslSystem()
+
 	// 构建可能的插件文件名列表，按优先级排序
-	possibleFiles := []string{
-		fmt.Sprintf("plugin-%s-%s.so", runtime.GOOS, runtime.GOARCH), // 当前系统架构
-		"plugin.so", // 通用备用文件
+	var possibleFiles []string
+
+	if isMusl {
+		// musl 环境：优先选择 musl 版本，然后是通用版本
+		possibleFiles = []string{
+			fmt.Sprintf("plugin-%s-%s-musl.so", runtime.GOOS, runtime.GOARCH), // musl 专用版本
+			fmt.Sprintf("plugin-%s-%s.so", runtime.GOOS, runtime.GOARCH),      // 通用系统架构版本
+			"plugin.so", // 通用备用文件
+		}
+	} else {
+		// glibc 环境：优先选择通用版本
+		possibleFiles = []string{
+			fmt.Sprintf("plugin-%s-%s.so", runtime.GOOS, runtime.GOARCH), // 当前系统架构版本
+			"plugin.so", // 通用备用文件
+		}
 	}
 
 	// 按优先级查找文件
 	for _, filename := range possibleFiles {
 		fullPath := filepath.Join(pluginDir, filename)
 		if _, err := os.Stat(fullPath); err == nil {
-			logger.Error(fmt.Sprintf("[%s]找到适用于系统 %s-%s 的插件文件", pluginDir, runtime.GOOS, runtime.GOARCH), "路径", fullPath)
+			// 检测选择的插件类型
+			pluginType := "glibc"
+			if strings.Contains(filename, "-musl.so") {
+				pluginType = "musl"
+			} else if filename == "plugin.so" {
+				pluginType = "通用"
+			}
+
+			logger.Info(fmt.Sprintf("[%s] 找到适用于系统 %s-%s (%s) 的插件文件",
+				filepath.Base(pluginDir), runtime.GOOS, runtime.GOARCH, pluginType),
+				"文件", filename, "路径", fullPath)
 			return fullPath, nil
 		}
 	}
 
-	return "", fmt.Errorf("未找到适用于系统 %s-%s 的插件文件", runtime.GOOS, runtime.GOARCH)
+	libcType := "glibc"
+	if isMusl {
+		libcType = "musl"
+	}
+	return "", fmt.Errorf("未找到适用于系统 %s-%s (%s) 的插件文件", runtime.GOOS, runtime.GOARCH, libcType)
 }
 
 // LoadAll 加载所有插件
