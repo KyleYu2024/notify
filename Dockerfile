@@ -38,26 +38,26 @@ RUN go mod download
 RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o notify cmd/notify/main.go
 
 # 构建插件（排除 demo 目录）
-RUN set -eux; \
-    for d in plugins/*; do \
-        if [ -d "$d" ] && [ -f "$d/plugin.go" ] && [ "$(basename "$d")" != "demo" ]; then \
-            echo "==> 构建插件: $(basename "$d")"; \
-            (cd "$d" && rm -f ./*.so && CGO_ENABLED=1 GOOS=linux go build -buildmode=plugin -o ./plugin.so ./plugin.go); \
-        fi; \
-    done
+# RUN set -eux; \
+#     for d in plugins/*; do \
+#         if [ -d "$d" ] && [ -f "$d/plugin.go" ] && [ "$(basename "$d")" != "demo" ]; then \
+#             echo "==> 构建插件: $(basename "$d")"; \
+#             (cd "$d" && rm -f ./*.so && CGO_ENABLED=1 GOOS=linux go build -buildmode=plugin -o ./plugin.so ./plugin.go); \
+#         fi; \
+#     done
 
 # 仅收集需要的文件到 plugins-dist（每个插件仅保留 setting.json 与 .so，排除 demo）
-RUN set -eux; \
-    rm -rf plugins-dist; mkdir -p plugins-dist; \
-    for d in plugins/*; do \
-        name=$(basename "$d"); \
-        if [ -d "$d" ] && [ "$name" != "demo" ]; then \
-            [ -f "$d/setting.json" ] || continue; \
-            mkdir -p "plugins-dist/$name"; \
-            cp "$d/setting.json" "plugins-dist/$name/"; \
-            if ls "$d"/*.so >/dev/null 2>&1; then cp "$d"/*.so "plugins-dist/$name/"; fi; \
-        fi; \
-    done
+# RUN set -eux; \
+#     rm -rf plugins-dist; mkdir -p plugins-dist; \
+#     for d in plugins/*; do \
+#         name=$(basename "$d"); \
+#         if [ -d "$d" ] && [ "$name" != "demo" ]; then \
+#             [ -f "$d/setting.json" ] || continue; \
+#             mkdir -p "plugins-dist/$name"; \
+#             cp "$d/setting.json" "plugins-dist/$name/"; \
+#             if ls "$d"/*.so >/dev/null 2>&1; then cp "$d"/*.so "plugins-dist/$name/"; fi; \
+#         fi; \
+#     done
 
 # 运行阶段
 FROM alpine:latest
@@ -85,7 +85,7 @@ VOLUME /config
 COPY --from=backend-builder /app/notify .
 
 # 复制精简后的插件目录到镜像种子目录（仅 setting.json 和 .so）
-COPY --from=backend-builder /app/plugins-dist /opt/plugins-dist
+# COPY --from=backend-builder /app/plugins-dist /opt/plugins-dist
 
 # 从前端构建阶段复制静态文件
 COPY --from=frontend-builder /app/dist /app/static
