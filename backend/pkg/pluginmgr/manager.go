@@ -73,7 +73,7 @@ func (m *Manager) findPluginFile(pluginDir string) (string, error) {
 	for _, filename := range possibleFiles {
 		fullPath := filepath.Join(pluginDir, filename)
 		if _, err := os.Stat(fullPath); err == nil {
-			logger.Error(fmt.Sprintf("找到适用于系统 %s-%s 的插件文件", runtime.GOOS, runtime.GOARCH), "路径", fullPath)
+			logger.Error(fmt.Sprintf("[%s]找到适用于系统 %s-%s 的插件文件", pluginDir, runtime.GOOS, runtime.GOARCH), "路径", fullPath)
 			return fullPath, nil
 		}
 	}
