@@ -15,6 +15,7 @@
     "is_show_type": true,
     "is_show_user": true,
     "is_show_year": true,
+    "is_show_season": true,
     "link_source": "emby",
     "notify_emby_users": "",
     "prefer_url_names": [
@@ -260,6 +261,22 @@
                     "props": {
                       "label": "显示 IP",
                       "model": "is_show_ip"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示剧集",
+                      "model": "is_show_season"
                     }
                   }
                 ],

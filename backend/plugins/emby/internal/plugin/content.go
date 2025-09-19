@@ -61,8 +61,10 @@ func (p *EmbyPlugin) buildContent(evt models.EmbyEvent, settings models.Settings
 		}
 	}
 
-	b.WriteString(p.buildEpisodeInfo(evt))
-	b.WriteString("\n")
+	if settings.IsShowSeason {
+		b.WriteString(p.buildEpisodeInfo(evt))
+		b.WriteString("\n")
+	}
 
 	if settings.IsShowType {
 		b.WriteString("🎯 类型: ")

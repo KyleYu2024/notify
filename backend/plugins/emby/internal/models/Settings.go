@@ -16,5 +16,6 @@ type Settings struct {
 	IsShowProgress  bool   `mapstructure:"is_show_progress" json:"is_show_progress"`
 	IsShowType      bool   `mapstructure:"is_show_type" json:"is_show_type"`
 	IsShowYear      bool   `mapstructure:"is_show_year" json:"is_show_year"`
+	IsShowSeason    bool   `mapstructure:"is_show_season" json:"is_show_season"`
 	NotifyEmbyUsers string `mapstructure:"notify_emby_users" json:"notify_emby_users"`
 }
