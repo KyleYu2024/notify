@@ -1,0 +1,198 @@
+name: Docker Image
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # 触发条件：v1.1.0, v2.0.0 等格式的标签
+  workflow_dispatch: # 允许手动触发
+    inputs:
+      tag:
+        description: "Docker 镜像标签"
+        required: false
+        default: "latest"
+        type: string
+      push_to_registry:
+        description: "是否推送到镜像注册表"
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY_DOCKERHUB: docker.io
+  IMAGE_NAME: notify
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Docker Hub credentials
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ] || [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "❌ 错误: 缺少 Docker Hub 凭据"
+            echo "请在仓库设置中添加以下 Secrets:"
+            echo "- DOCKERHUB_USERNAME: 您的 Docker Hub 用户名"
+            echo "- DOCKERHUB_TOKEN: 您的 Docker Hub 访问令牌"
+            exit 1
+          fi
+          echo "✅ Docker Hub 凭据检查通过"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # 从 git tag 提取版本号 (v1.1.0 -> 1.1.0)
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+            echo "is_release=true" >> $GITHUB_OUTPUT
+          else
+            # 手动触发
+            VERSION="${{ github.event.inputs.tag }}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "tag=$VERSION" >> $GITHUB_OUTPUT
+            echo "is_release=false" >> $GITHUB_OUTPUT
+          fi
+          echo "提取的版本号: $VERSION"
+
+      #   - name: Login to GitHub Container Registry
+      #     if: github.event_name != 'pull_request'
+      #     uses: docker/login-action@v3
+      #     with:
+      #       registry: ${{ env.REGISTRY_GHCR }}
+      #       username: ${{ github.actor }}
+      #       password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY_DOCKERHUB }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY_DOCKERHUB }}/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.extract_version.outputs.tag }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && (github.event.inputs.push_to_registry != 'false') }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ steps.extract_version.outputs.version }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Generate build summary
+        run: |
+          echo "## 🐳 Docker 镜像构建完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 构建信息" >> $GITHUB_STEP_SUMMARY
+          echo "- **版本**: ${{ steps.extract_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **标签**: ${{ steps.extract_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **架构**: linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "- **触发方式**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **提交**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **推送目标**: Docker Hub" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏷️ 镜像标签" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "### 🚀 使用方法" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "# 从 Docker Hub 拉取镜像" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.extract_version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# 或者使用 latest 标签" >> $GITHUB_STEP_SUMMARY
+            echo "docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create Release
+        if: steps.extract_version.outputs.is_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.extract_version.outputs.version }}
+          name: "通知服务 v${{ steps.extract_version.outputs.version }}"
+          body: |
+            ## 🚀 通知服务发布 v${{ steps.extract_version.outputs.version }}
+
+            ### 📦 Docker 镜像
+
+            此版本已构建多架构 Docker 镜像，支持以下平台：
+            - **linux/amd64** - 适用于 x86_64 架构
+            - **linux/arm64** - 适用于 ARM64 架构（如 Apple Silicon、Raspberry Pi 等）
+
+            ### 🐳 获取镜像
+
+            #### Docker Hub
+            ```bash
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v${{ steps.extract_version.outputs.version }}
+            ```
+
+            ### 🚀 快速启动
+
+            ```bash
+            # 使用 docker run
+            docker run -d \\
+              --name notify-app \\
+              -p 8088:8088 \\
+              -v ./config:/config \\
+              -e TZ=Asia/Shanghai \\
+              ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v${{ steps.extract_version.outputs.version }}
+
+            # 使用 docker-compose
+            # 请参考项目中的 docker-compose.yml 文件
+            ```
+
+            ### 📝 更新说明
+
+            请查看 [提交历史](https://github.com/${{ github.repository }}/commits/v${{ steps.extract_version.outputs.version }}) 了解详细更改内容。
+
+            ### ⚠️ 注意事项
+
+            - 首次运行时请确保配置目录存在并包含必要的配置文件
+            - 推荐使用 docker-compose 进行部署管理
+            - 如需使用插件功能，请同时下载对应的插件包
+
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}

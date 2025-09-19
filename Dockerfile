@@ -22,11 +22,16 @@ RUN pnpm build
 # 后端构建阶段
 FROM golang:1.25.1-alpine AS backend-builder
 
+# 添加平台参数，由 Docker buildx 自动提供
+ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
 # 设置工作目录
 WORKDIR /app
 
 # 安装git、ca-certificates 以及构建所需工具链（gcc、musl-dev 等）
-RUN apk add --no-cache git ca-certificates build-base pkgconfig
+RUN apk add --no-cache git ca-certificates build-base pkgconfig binutils musl-dev lld binutils-gold
 
 # 复制后端代码
 COPY backend/ ./
@@ -34,15 +39,15 @@ COPY backend/ ./
 # 下载依赖
 RUN go mod download
 
-# 编译应用
-RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o notify cmd/notify/main.go
+# 编译应用 - 使用动态平台参数
+RUN CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -a -installsuffix cgo -o notify cmd/notify/main.go
 
-# 构建插件（排除 demo 目录）
+# 构建插件（排除 demo 目录）- 支持多平台
 # RUN set -eux; \
 #     for d in plugins/*; do \
 #         if [ -d "$d" ] && [ -f "$d/plugin.go" ] && [ "$(basename "$d")" != "demo" ]; then \
-#             echo "==> 构建插件: $(basename "$d")"; \
-#             (cd "$d" && rm -f ./*.so && CGO_ENABLED=1 GOOS=linux go build -buildmode=plugin -o ./plugin.so ./plugin.go); \
+#             echo "==> 构建插件: $(basename "$d") for ${TARGETOS}/${TARGETARCH}"; \
+#             (cd "$d" && rm -f ./*.so && CGO_ENABLED=1 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -buildmode=plugin -o ./plugin.so ./plugin.go); \
 #         fi; \
 #     done
 

@@ -14,10 +14,14 @@ show_help() {
     echo "  -h, --help         显示帮助信息"
     echo ""
     echo "Examples:"
-    echo "  $0                          # 构建所有插件（默认平台）"
-    echo "  $0 emby                     # 只构建 emby 插件（默认平台）"
-    echo "  $0 -p linux/amd64 emby     # 构建 emby 插件（指定平台）"
-    echo "  $0 -d                       # 调试模式构建所有插件"
+    echo "  $0                 # 构建所有插件"
+    echo "  $0 emby            # 只构建 emby 插件"
+    echo "  $0 -p linux/amd64 emby  # 自定义平台构建 emby 插件"
+    echo "  $0 -d              # 调试模式构建所有插件"
+    echo ""
+    echo "说明:"
+    echo "  - 使用 xgo 进行交叉编译，支持 Linux、macOS 等平台"
+    echo "  - musl 版本通过 GitHub Actions 自动构建"
 }
 
 # 解析命令行参数
@@ -53,8 +57,8 @@ if [ "$DEBUG_MODE" -eq 1 ]; then
     echo "🔍 调试模式已启用"
 fi
 
-# 构建单个插件
-build_plugin() {
+# 构建单个插件（使用 xgo）
+build_plugin_impl() {
     local plugin_dir="$1"
     echo "🔨 构建插件: $plugin_dir"
     
@@ -89,12 +93,25 @@ build_plugin() {
         if [[ -f "$file" ]]; then
             # 提取平台信息
             platform=${file#plugin-}
-            mv "$file" "plugin-${platform}.so"
-            echo "✅ 生成: plugin-${platform}.so"
+            
+            # 移除各种可能的扩展名，只保留平台信息
+            platform=${platform%.so}     # 移除 .so
+            platform=${platform%.exe}    # 移除 .exe
+            platform=${platform%.dll}    # 移除 .dll
+            
+            # 生成最终文件名
+            final_name="plugin-${platform}.so"
+            
+            # 重命名（如果文件名不同的话）
+            if [[ "$file" != "$final_name" ]]; then
+                mv "$file" "$final_name"
+            fi
+            
+            echo "✅ 生成: $final_name"
             
             # 如果不是调试模式，使用 upx 压缩（如果可用）
             if [ "$DEBUG_MODE" -eq 0 ] && command -v upx &> /dev/null; then
-                upx -q "plugin-${platform}.so" || true
+                upx -q "$final_name" || true
             fi
         fi
     done
@@ -103,12 +120,16 @@ build_plugin() {
     return 0
 }
 
+
 # 主构建逻辑
 echo "🚀 开始构建..."
 echo "🎯 目标平台: $PLATFORMS"
+
 if [ -n "$PLUGIN_NAME" ]; then
     echo "📍 指定插件: $PLUGIN_NAME"
 fi
+
+echo "ℹ️  musl 版本将通过 GitHub Actions 自动构建"
 
 # 确保在 plugins 目录下
 if [[ $(basename "$PWD") != "plugins" ]]; then
@@ -121,6 +142,12 @@ if [[ $(basename "$PWD") != "plugins" ]]; then
         exit 1
     fi
 fi
+
+# 构建插件函数
+build_plugin() {
+    local plugin_dir="$1"
+    build_plugin_impl "$plugin_dir"
+}
 
 # 构建指定插件或所有插件
 if [ -n "$PLUGIN_NAME" ]; then
@@ -140,3 +167,5 @@ else
 fi
 
 echo "✨ 构建完成!"
+echo "📊 构建摘要:"
+echo "  ✅ 目标平台: $PLATFORMS"
