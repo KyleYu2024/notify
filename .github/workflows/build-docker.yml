@@ -95,10 +95,8 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             type=raw,value=${{ steps.extract_version.outputs.tag }}
 
       - name: Build and push Docker image
@@ -144,55 +142,3 @@ jobs:
             echo "docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: Create Release
-        if: steps.extract_version.outputs.is_release == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.extract_version.outputs.version }}
-          name: "通知服务 v${{ steps.extract_version.outputs.version }}"
-          body: |
-            ## 🚀 通知服务发布 v${{ steps.extract_version.outputs.version }}
-
-            ### 📦 Docker 镜像
-
-            此版本已构建多架构 Docker 镜像，支持以下平台：
-            - **linux/amd64** - 适用于 x86_64 架构
-            - **linux/arm64** - 适用于 ARM64 架构（如 Apple Silicon、Raspberry Pi 等）
-
-            ### 🐳 获取镜像
-
-            #### Docker Hub
-            ```bash
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v${{ steps.extract_version.outputs.version }}
-            ```
-
-            ### 🚀 快速启动
-
-            ```bash
-            # 使用 docker run
-            docker run -d \\
-              --name notify-app \\
-              -p 8088:8088 \\
-              -v ./config:/config \\
-              -e TZ=Asia/Shanghai \\
-              ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:v${{ steps.extract_version.outputs.version }}
-
-            # 使用 docker-compose
-            # 请参考项目中的 docker-compose.yml 文件
-            ```
-
-            ### 📝 更新说明
-
-            请查看 [提交历史](https://github.com/${{ github.repository }}/commits/v${{ steps.extract_version.outputs.version }}) 了解详细更改内容。
-
-            ### ⚠️ 注意事项
-
-            - 首次运行时请确保配置目录存在并包含必要的配置文件
-            - 推荐使用 docker-compose 进行部署管理
-            - 如需使用插件功能，请同时下载对应的插件包
-
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-          token: ${{ secrets.GITHUB_TOKEN }}
