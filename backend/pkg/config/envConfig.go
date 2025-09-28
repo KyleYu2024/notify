@@ -7,7 +7,7 @@ import (
 )
 
 type EnvConfig struct {
-	VERSION         string `default:"v0.1.2"`
+	VERSION         string `default:"v0.1.3"`
 	NOTIFY_USERNAME string
 	NOTIFY_PASSWORD string
 	LOG_LEVEL       string `default:"info"`
