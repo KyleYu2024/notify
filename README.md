@@ -96,7 +96,7 @@ mkdir -p ./config
 # 启动服务（使用默认配置）
 docker run -d \
   --name notify \
-  -p 8088:8088 \
+  -p 7879:7879 \
   -v $(pwd)/config:/config \
   -e NOTIFY_USERNAME=admin \
   -e NOTIFY_PASSWORD=password123 \
@@ -118,7 +118,7 @@ services:
     image: jianxcao/notify:latest
     container_name: notify-app
     ports:
-      - "8088:8088"
+      - "7879:7879"
     volumes:
       - ./config:/config
     environment:
