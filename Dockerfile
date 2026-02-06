@@ -116,4 +116,4 @@ ENV PLUGINS_DIR=/config/plugins
 
 # 启动应用
 ENTRYPOINT ["/app/entrypoint" ]
-EXPOSE 8088
+EXPOSE 7879
