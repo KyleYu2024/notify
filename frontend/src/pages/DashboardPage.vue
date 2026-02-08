@@ -123,7 +123,7 @@
                 <template v-slot:prepend>
                   <v-icon icon="mdi-server" color="info"></v-icon>
                 </template>
-                <v-list-item-title>当前版本</v-h-list-item-title>
+                <v-list-item-title>当前版本</v-list-item-title>
                 <v-list-item-subtitle>{{ authStore.version || 'v0.1.4' }}</v-list-item-subtitle>
               </v-list-item>
               
