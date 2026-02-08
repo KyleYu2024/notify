@@ -103,7 +103,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" v-if="!display.mobile.value">
         <v-card class="mb-4 h-100" elevation="0" border rounded="lg">
           <v-card-title class="d-flex align-center">
             <v-icon icon="mdi-information" class="mr-2" color="info"></v-icon>
@@ -147,6 +147,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
 import { useAuthStore } from '@/store/auth'
 import { useAppsStore } from '@/store/apps'
 import { useNotifiersStore } from '@/store/notifiers'
@@ -158,6 +159,7 @@ const authStore = useAuthStore()
 const appsStore = useAppsStore()
 const notifiersStore = useNotifiersStore()
 const templatesStore = useTemplatesStore()
+const display = useDisplay()
 
 // 页面加载状态
 const pageLoading = ref(true)
@@ -269,6 +271,9 @@ onUnmounted(() => {
   transition: transform 0.2s, box-shadow 0.2s;
   /* 调整圆角为 16px，更现代的大圆角风格 */
   border-radius: 16px !important;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
   
   &:hover {
     transform: translateY(-2px);

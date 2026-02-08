@@ -212,7 +212,7 @@ onMounted(() => {
     </v-list>
   </v-navigation-drawer>
 
-  <v-main class="bg-grey-50">
+  <v-main class="bg-background">
     <v-container fluid class="pa-6">
       <router-view></router-view>
     </v-container>
@@ -256,7 +256,7 @@ onMounted(() => {
 
   /* 针对 Night 模式的特殊处理 */
   :deep(.v-theme--night) .v-app-bar {
-    background-color: rgba(28, 28, 30, 0.75) !important;
+    background-color: rgba(15, 15, 15, 0.75) !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);

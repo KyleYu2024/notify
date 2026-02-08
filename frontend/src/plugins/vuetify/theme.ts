@@ -35,7 +35,7 @@ const theme: VuetifyOptions['theme'] = {
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF', // 深橙色背景配白字很清晰
         
-        background: '#FFFFFF',   
+        background: '#F0F2F5',   
         'on-background': '#202124', 
         surface: '#FFFFFF',
         'on-surface': '#202124',
@@ -86,7 +86,7 @@ const theme: VuetifyOptions['theme'] = {
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF', // 橙色配白字
         
-        background: '#000000',   
+        background: '#0F0F0F',   // 稍微提升背景色 (原 #000000)
         'on-background': '#FFFFFF',
         surface: '#1C1C1E',      
         'on-surface': '#FFFFFF',

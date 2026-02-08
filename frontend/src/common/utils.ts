@@ -260,7 +260,7 @@ export function getCurrentBaseUrl(): string {
  */
 export function updateThemeColor(themeName: string, customColor?: string) {
   const isDark = themeName === 'night' || themeName === 'dark' || themeName === 'macosDark'
-  const color = customColor || (isDark ? '#1C1C1E' : '#FFFFFF')
+  const color = customColor || (isDark ? '#0F0F0F' : '#F0F2F5')
   
   // 更新 theme-color meta 标签
   let meta = document.querySelector('meta[name="theme-color"]')
