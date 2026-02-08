@@ -55,7 +55,7 @@
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-card class="mb-4 h-100" elevation="0" border rounded="lg">
+        <v-card class="mb-4 h-100" elevation="0" border rounded="xl">
           <v-card-title class="d-flex align-center">
             <v-icon icon="mdi-heart-pulse" class="mr-2" color="error"></v-icon>
             系统状态
@@ -104,7 +104,7 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="6" v-if="!display.mobile.value">
-        <v-card class="mb-4 h-100" elevation="0" border rounded="lg">
+        <v-card class="mb-4 h-100" elevation="0" border rounded="xl">
           <v-card-title class="d-flex align-center">
             <v-icon icon="mdi-information" class="mr-2" color="info"></v-icon>
             系统信息
@@ -124,7 +124,7 @@
                   <v-icon icon="mdi-server" color="info"></v-icon>
                 </template>
                 <v-list-item-title>当前版本</v-list-item-title>
-                <v-list-item-subtitle>{{ authStore.version || 'v0.2.2' }}</v-list-item-subtitle>
+                <v-list-item-subtitle>{{ authStore.version || 'v0.2.3' }}</v-list-item-subtitle>
               </v-list-item>
               
               <v-list-item>

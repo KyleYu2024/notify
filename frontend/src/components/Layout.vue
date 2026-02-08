@@ -208,7 +208,7 @@ onMounted(() => {
 
     <v-list nav density="comfortable" class="mt-2">
       <v-list-item v-for="item in menuItems" :key="item.title" :to="item.to" :prepend-icon="item.icon"
-        :title="item.title" :subtitle="item.subtitle" color="primary" rounded="lg" class="mb-1"></v-list-item>
+        :title="item.title" :subtitle="item.subtitle" color="primary" rounded="xl" class="mb-1"></v-list-item>
     </v-list>
   </v-navigation-drawer>
 

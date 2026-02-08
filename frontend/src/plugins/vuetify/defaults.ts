@@ -8,6 +8,7 @@ export default {
     },
   },
   VAlert: {
+    rounded: 'lg',
     VBtn: {
       color: undefined,
     },
@@ -26,12 +27,21 @@ export default {
   VBtn: {
     // set v-btn default color to primary
     color: 'primary',
+    rounded: 'lg',
+  },
+  VCard: {
+    rounded: 'lg',
+  },
+  VDialog: {
+    rounded: 'xl',
   },
   VChip: {
     elevation: 0,
+    rounded: 'lg',
   },
   VList: {
     color: 'primary',
+    rounded: 'lg',
   },
   VPagination: {
     activeColor: 'primary',
@@ -68,6 +78,7 @@ export default {
     variant: 'outlined',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg',
   },
   VRangeSlider: {
     // set v-range-slider default color to primary
@@ -95,26 +106,31 @@ export default {
     variant: 'outlined',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg',
   },
   VAutocomplete: {
     variant: 'outlined',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg',
   },
   VCombobox: {
     variant: 'outlined',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg',
   },
   VFileInput: {
     variant: 'outlined',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg',
   },
   VTextarea: {
     variant: 'outlined',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg',
   },
   VSwitch: {
     // set v-switch default color to primary
