@@ -7,7 +7,7 @@ services:
     image: notify-app:latest
     container_name: notify-app
     ports:
-      - "8088:8088"
+      - "7879:7879"
     volumes:
       - ./backend/.config:/config
     environment:

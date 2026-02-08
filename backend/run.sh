@@ -5,7 +5,7 @@ export NOTIFY_PASSWORD="admin"
 export LOG_LEVEL="debug"
 export LOG_FORMAT="text"
 export CGO_ENABLED=1
-export PORT="8088"
+export PORT="7879"
 export CONFIG_FILE=".config/config.yaml"
 export PLUGINS_DIR="./plugins"
 

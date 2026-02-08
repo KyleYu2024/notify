@@ -106,7 +106,7 @@ docker run -d \
 ```
 
 **访问服务**：
-- 管理界面：http://localhost:8088
+- 管理界面：http://localhost:7879
 - 默认账号：admin / password123
 
 ### 使用 Docker Compose（推荐）
@@ -141,7 +141,7 @@ docker-compose up -d
 ```
 
 3. **访问管理界面进行配置**：
-- 访问：http://localhost:8088
+- 访问：http://localhost:7879
 - 默认账号：admin / password123
 - 🎯 **重要**：您可以完全通过 Web 界面配置所有设置，无需手动编辑 YAML 文件
 
@@ -218,7 +218,7 @@ pnpm run build
 启动服务后，访问 Web 管理界面进行可视化配置：
 
 1. **访问管理界面**
-   - 地址：http://localhost:8088
+   - 地址：http://localhost:7879
    - 默认账号：admin / password123
 
 2. **配置通知渠道**
@@ -354,7 +354,7 @@ templates:
 
 ```bash
 # 发送通知（需要认证）
-curl -X POST "http://localhost:8088/api/v1/notify/system_alerts" \
+curl -X POST "http://localhost:7879/api/v1/notify/system_alerts" \
   -H "Authorization: Bearer your_secure_token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -364,10 +364,10 @@ curl -X POST "http://localhost:8088/api/v1/notify/system_alerts" \
   }'
 
 # 使用 GET 方式（支持字段映射）
-curl "http://localhost:8088/api/v1/notify/system_alerts?title=告警&content=磁盘空间不足&level=warning"
+curl "http://localhost:7879/api/v1/notify/system_alerts?title=告警&content=磁盘空间不足&level=warning"
 
 # 飞书通知示例（支持多种ID类型）
-curl -X POST "http://localhost:8088/api/v1/notify/feishu_alerts" \
+curl -X POST "http://localhost:7879/api/v1/notify/feishu_alerts" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "飞书通知测试",
@@ -467,7 +467,7 @@ notify/
 | `LOG_LEVEL` | 日志级别 (debug/info/warn/error) | `info` |
 | `LOG_FORMAT` | 日志格式 (text/json) | `text` |
 | `CONFIG_FILE` | 配置文件路径 | `config/config.yaml` |
-| `PORT` | 服务监听端口 | `:8088` |
+| `PORT` | 服务监听端口 | `:7879` |
 
 
 <!-- ### ☕ 支持项目

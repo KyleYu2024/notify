@@ -13,7 +13,7 @@ type EnvConfig struct {
 	LOG_LEVEL       string `default:"info"`
 	LOG_FORMAT      string `default:"text"`
 	CONFIG_FILE     string `default:"config/config.yaml"`
-	PORT            string `default:":8088"`
+	PORT            string `default:":7879"`
 	STATIC_DIR      string `default:"/app/static"`
 	PLUGINS_DIR     string `default:"/config/plugins"`
 }
