@@ -1,0 +1,528 @@
+{
+  "id": "emby",
+  "name": "Emby插件",
+  "version": "1.0.0",
+  "description": "解析EmbyWebhook 事件并生成标准输出",
+  "author": "jianxcao",
+  "settings": {
+    "emby_api_key": "",
+    "emby_base_url": "",
+    "image_source": "remote",
+    "is_show_device": true,
+    "is_show_ip": true,
+    "is_show_progress": true,
+    "is_show_time": true,
+    "is_show_type": true,
+    "is_show_user": true,
+    "is_show_year": true,
+    "is_show_season": true,
+    "link_source": "emby",
+    "notify_emby_users": "",
+    "prefer_url_names": [
+      "MovieDb",
+      "IMDb",
+      "Trakt"
+    ],
+    "targets": ""
+  },
+  "ui": {
+    "component": "v-card",
+    "content": [
+      {
+        "component": "v-card-text",
+        "content": [
+          {
+            "component": "v-row",
+            "content": [
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "div",
+                    "text": "基础配置",
+                    "props": {
+                      "class": "text-subtitle-2 mb-2"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-text-field",
+                    "props": {
+                      "clearable": true,
+                      "label": "Emby 基础地址",
+                      "model": "emby_base_url",
+                      "placeholder": "例如：https://emby.example.com:8096",
+                      "prepend-inner-icon": "mdi-web"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-text-field",
+                    "props": {
+                      "clearable": true,
+                      "label": "Emby API Key",
+                      "model": "emby_api_key",
+                      "placeholder": "在 Emby 控制台生成的 API Key",
+                      "prepend-inner-icon": "mdi-key-variant"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-divider"
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              }
+            ]
+          },
+          {
+            "component": "v-row",
+            "content": [
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "div",
+                    "text": "媒体资源与链接",
+                    "props": {
+                      "class": "text-subtitle-2 mb-2"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-select",
+                    "props": {
+                      "clearable": false,
+                      "hint": "图片来源，nas表示本机 nas 图片，remote表示从emby返回的远程地址",
+                      "items": [
+                        {
+                          "title": "远程",
+                          "value": "remote"
+                        },
+                        {
+                          "title": "Nas",
+                          "value": "nas"
+                        }
+                      ],
+                      "label": "图片来源 image_source",
+                      "model": "image_source",
+                      "persistent-hint": true
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 6
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-select",
+                    "props": {
+                      "clearable": false,
+                      "hint": "链接来源，remote表示从外部站点，emby表示从emby主页",
+                      "items": [
+                        {
+                          "title": "外部站点",
+                          "value": "remote"
+                        },
+                        {
+                          "title": "Emby主页",
+                          "value": "emby"
+                        }
+                      ],
+                      "label": "链接来源 link_source",
+                      "model": "link_source",
+                      "persistent-hint": true
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 6
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-divider"
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              }
+            ]
+          },
+          {
+            "component": "v-row",
+            "content": [
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "div",
+                    "text": "显示内容",
+                    "props": {
+                      "class": "text-subtitle-2 mb-2"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示时间",
+                      "model": "is_show_time"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示用户",
+                      "model": "is_show_user"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示设备",
+                      "model": "is_show_device"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示 IP",
+                      "model": "is_show_ip"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示剧集",
+                      "model": "is_show_season"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示播放进度",
+                      "model": "is_show_progress"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示类型",
+                      "model": "is_show_type"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-switch",
+                    "props": {
+                      "label": "显示年份",
+                      "model": "is_show_year"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12,
+                  "md": 3
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-divider"
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              }
+            ]
+          },
+          {
+            "component": "v-row",
+            "content": [
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "div",
+                    "text": "通知目标",
+                    "props": {
+                      "class": "text-subtitle-2 mb-2"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-text-field",
+                    "props": {
+                      "clearable": true,
+                      "hint": "多个目标用英文逗号分隔",
+                      "label": "targets（逗号分隔）",
+                      "model": "targets",
+                      "persistent-hint": true,
+                      "placeholder": "target1,target2,target3"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              }
+            ]
+          },
+          {
+            "component": "v-row",
+            "content": [
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "div",
+                    "text": "emby用户",
+                    "props": {
+                      "class": "text-subtitle-2 mb-2"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              },
+              {
+                "component": "v-col",
+                "content": [
+                  {
+                    "component": "v-text-field",
+                    "props": {
+                      "clearable": true,
+                      "hint": "emby那边的用户，只有匹配的用户播放才会通知，多个用户用英文逗号分隔",
+                      "label": "Users（逗号分隔）",
+                      "model": "notify_emby_users",
+                      "persistent-hint": true,
+                      "placeholder": "user1,user2,user3"
+                    }
+                  }
+                ],
+                "props": {
+                  "cols": 12
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "slots": {},
+    "props": {}
+  },
+  "enabled": true,
+  "test_data": {
+    "Date": "2025-08-01T05:36:49.1895436Z",
+    "Description": "2025年8月1日星期五 下午1:36",
+    "Event": "playback.start",
+    "Item": {
+      "BackdropImageTags": [],
+      "Bitrate": 24123356,
+      "CommunityRating": 7.553,
+      "Container": "mkv",
+      "DateCreated": "2025-07-26T15:38:57.0000000Z",
+      "ExternalUrls": [
+        {
+          "Name": "IMDb",
+          "Url": "https://www.imdb.com/title/tt28035408"
+        },
+        {
+          "Name": "TheTVDB",
+          "Url": "https://thetvdb.com/?tab=episode\u0026id=10296840"
+        },
+        {
+          "Name": "Trakt",
+          "Url": "https://trakt.tv/search/imdb/tt28035408"
+        }
+      ],
+      "FileName": "悬案解码 - S01E01 - 第 1 集.strm",
+      "GenreItems": [],
+      "Genres": [],
+      "Height": 1080,
+      "Id": "61473",
+      "ImageTags": {
+        "Primary": "70ed5da50bda5305c7484fb08098c8e1"
+      },
+      "IndexNumber": 1,
+      "IsFolder": false,
+      "MediaType": "Video",
+      "Name": "第 1 集",
+      "Overview": "　　卡尔默克督察长大难不死，回到工作岗位上，发现自己成了新部门的主管。一位检察官在法庭上度过艰难的一天。",
+      "ParentBackdropImageTags": [
+        "01b7daa0c26eb41b446b6d8afae07733"
+      ],
+      "ParentBackdropItemId": "61471",
+      "ParentId": "61472",
+      "ParentIndexNumber": 1,
+      "ParentLogoImageTag": "ec7a16b859dd970139c711737ffff076",
+      "ParentLogoItemId": "61471",
+      "Path": "media/tv/en/悬案解码 (2025)/Season 1/悬案解码 - S01E01 - 第 1 集.strm",
+      "PremiereDate": "2025-05-29T00:00:00.0000000Z",
+      "PrimaryImageAspectRatio": 1.7777777777777777,
+      "ProductionYear": 2025,
+      "ProviderIds": {
+        "Imdb": "tt28035408",
+        "Tvdb": "10296840"
+      },
+      "RemoteTrailers": [],
+      "RunTimeTicks": 39551590000,
+      "SeasonId": "61472",
+      "SeasonName": "第 1 季",
+      "SeriesId": "61471",
+      "SeriesName": "悬案解码",
+      "SeriesPrimaryImageTag": "6d7acd4c7796e3ce74ae46ae6eaf88f6",
+      "ServerId": "f54fd297966f47a9af251f94e671f126",
+      "Size": 11926463853,
+      "SortName": "第 1 集",
+      "Studios": [],
+      "TagItems": [],
+      "Taglines": [],
+      "Type": "Episode",
+      "Width": 1920
+    },
+    "PlaybackInfo": {
+      "PlaySessionId": "e6980d74f1524738bce0b832d7f12988",
+      "PlaylistIndex": 0,
+      "PlaylistLength": 1,
+      "PositionTicks": 0
+    },
+    "Server": {
+      "Id": "asdfasdfasdfasdf",
+      "Name": "test-aaa",
+      "Version": "4.8.11.0"
+    },
+    "Session": {
+      "ApplicationVersion": "5.6.4",
+      "Client": "SenPlayer",
+      "DeviceId": "D0082EFC-2BB7-438F-9652-B4F108AB9CA5",
+      "DeviceName": "iPhone",
+      "Id": "65b9eb49462e58eb8193de6c9d3a6e4e",
+      "RemoteEndPoint": "111.111.111.111"
+    },
+    "Title": "admin 在 iPhone 上开始播放 悬案解码 - S1, Ep1 - 第 1 集",
+    "User": {
+      "Id": "13123123sdfasf",
+      "Name": "test"
+    }
+  }
+}

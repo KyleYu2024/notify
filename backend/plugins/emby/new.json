@@ -1,0 +1,106 @@
+{
+    "Date": "2025-08-02T03:26:33.5246417Z",
+    "Description": "2025年8月2日星期六 上午11:26\n\n天劫之后，哪吒、敖丙的灵魂虽保住了，但肉身很快会魂飞魄散。太乙真人打算用七色宝莲给二人重塑肉身。但是在重塑肉身的过程中却遇到重重困难，哪吒、敖丙的命运将走向何方？  申公豹放出被囚的四龙王，东海龙王敖光人形首次曝光并表示“我若出战，就让陈塘关鸡犬不留”，哪吒为了守卫陈塘关将与四海龙王大打出手。",
+    "Event": "library.new",
+    "Item": {
+        "BackdropImageTags": [
+            "36afb81ad4a484ad63551d1e6ab3d2b7"
+        ],
+        "CommunityRating": 8.064,
+        "DateCreated": "2025-08-02T03:25:02.3243666Z",
+        "ExternalUrls": [
+            {
+                "Name": "IMDb",
+                "Url": "https://www.imdb.com/title/tt34956443"
+            },
+            {
+                "Name": "MovieDb",
+                "Url": "https://www.themoviedb.org/movie/980477"
+            },
+            {
+                "Name": "Trakt",
+                "Url": "https://trakt.tv/search/tmdb/980477?id_type=movie"
+            }
+        ],
+        "FileName": "哪吒之魔童闹海 (2025) - 2160p.strm",
+        "GenreItems": [
+            {
+                "Id": 64,
+                "Name": "动画"
+            },
+            {
+                "Id": 83,
+                "Name": "奇幻"
+            },
+            {
+                "Id": 218,
+                "Name": "冒险"
+            },
+            {
+                "Id": 67,
+                "Name": "动作"
+            }
+        ],
+        "Genres": [
+            "动画",
+            "奇幻",
+            "冒险",
+            "动作"
+        ],
+        "Id": "61658",
+        "ImageTags": {
+            "Logo": "a1bd245c62cc344f383ed403a87758e3",
+            "Primary": "cbef6d7f9896f2aa56d69c66da3109c9",
+            "Thumb": "2f899999566d55a51539cce0c429afa7"
+        },
+        "IsFolder": false,
+        "MediaType": "Video",
+        "Name": "哪吒之魔童闹海",
+        "OfficialRating": "NR",
+        "OriginalTitle": "哪吒之魔童闹海",
+        "Overview": "天劫之后，哪吒、敖丙的灵魂虽保住了，但肉身很快会魂飞魄散。太乙真人打算用七色宝莲给二人重塑肉身。但是在重塑肉身的过程中却遇到重重困难，哪吒、敖丙的命运将走向何方？  申公豹放出被囚的四龙王，东海龙王敖光人形首次曝光并表示“我若出战，就让陈塘关鸡犬不留”，哪吒为了守卫陈塘关将与四海龙王大打出手。",
+        "ParentId": "61601",
+        "Path": "media/movie/anime/哪吒之魔童闹海 (2025)/哪吒之魔童闹海 (2025) - 2160p.strm",
+        "PremiereDate": "2025-01-28T16:00:00.0000000Z",
+        "PrimaryImageAspectRatio": 0.6666666666666666,
+        "ProductionYear": 2025,
+        "ProviderIds": {
+            "Imdb": "tt34956443",
+            "Tmdb": "980477"
+        },
+        "RemoteTrailers": [
+            {
+                "Url": "https://www.youtube.com/watch?v=2HB4j0hTSJY"
+            }
+        ],
+        "ServerId": "f54fd297966f47a9af251f94e671f126",
+        "SortName": "哪吒之魔童闹海",
+        "Studios": [
+            {
+                "Id": 61634,
+                "Name": "Chengdu Coco Cartoon"
+            },
+            {
+                "Id": 558,
+                "Name": "Beijing Enlight Pictures"
+            },
+            {
+                "Id": 61635,
+                "Name": "Chengdu Enlight Animation"
+            },
+            {
+                "Id": 61636,
+                "Name": "Coloroom Pictures"
+            }
+        ],
+        "TagItems": [],
+        "Taglines": [],
+        "Type": "Movie"
+    },
+    "Server": {
+        "Id": "asdfasdfasdf",
+        "Name": "test-aba",
+        "Version": "4.8.11.0"
+    },
+    "Title": "新 哪吒之魔童闹海 在 aa-bbb"
+}

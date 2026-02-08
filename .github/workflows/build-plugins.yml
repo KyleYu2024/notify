@@ -1,0 +1,176 @@
+name: Build Plugins
+on:
+  push:
+    tags:
+      - "plugin@*"
+  workflow_dispatch:
+    inputs:
+      plugin_name:
+        description: "指定要构建的插件名称（留空则构建全部）"
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
+    env:
+      GO111MODULE: "on"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.25.1
+          check-latest: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Install dependencies
+        run: |
+          docker pull crazymax/xgo:latest
+          go install github.com/crazy-max/xgo@latest
+          sudo apt update
+          sudo apt install -y upx
+
+          # 验证多架构支持
+          echo "🔍 检查多架构支持..."
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker buildx ls
+
+          # 测试 ARM64 模拟
+          echo "🧪 测试 ARM64 模拟..."
+          docker run --rm --platform linux/arm64 alpine:latest uname -a || echo "⚠️  ARM64 模拟不可用"
+
+      - name: Build plugins
+        working-directory: backend
+        run: |
+          # 验证工具链
+          echo "🔍 检查构建工具..."
+          which xgo || echo "xgo 未找到"
+          which docker || echo "docker 未找到"
+          go version
+
+          # 修改脚本权限
+          chmod +x build-plugin-xgo.sh
+          chmod +x build-plugin-musl.sh
+
+          # 构建 glibc 版本（使用 xgo）
+          echo "🚀 步骤 1/2: 构建 glibc 版本..."
+          if [ -n "${{ github.event.inputs.plugin_name }}" ]; then
+            ./build-plugin-xgo.sh "${{ github.event.inputs.plugin_name }}"
+          else
+            ./build-plugin-xgo.sh
+          fi
+
+          # 构建 musl 版本（使用新的专用脚本）
+          echo "🚀 步骤 2/2: 构建 musl 版本..."
+
+          # 设置 Docker 环境变量以支持多架构
+          export DOCKER_CLI_EXPERIMENTAL=enabled
+          export DOCKER_BUILDKIT=1
+
+          if [ -n "${{ github.event.inputs.plugin_name }}" ]; then
+            ./build-plugin-musl.sh "${{ github.event.inputs.plugin_name }}"
+          else
+            ./build-plugin-musl.sh
+          fi
+
+          # 显示构建结果
+          echo "📊 构建结果:"
+          find plugins -name "*.so" -type f | sort
+
+      - name: Package plugins
+        working-directory: backend/plugins
+        run: |
+          # 为每个插件创建压缩包
+          for plugin_dir in */; do
+            plugin_name=${plugin_dir%/}
+            echo "正在打包插件: $plugin_name"
+            
+            # 创建临时目录
+            mkdir -p "temp_$plugin_name"
+            
+            # 复制插件文件到临时目录 (包括 glibc 和 musl 版本)
+            cp "$plugin_name"/plugin-*.so "temp_$plugin_name/" 2>/dev/null || true
+            cp "$plugin_name"/setting.json "temp_$plugin_name/" 2>/dev/null || true
+            
+            # 显示复制的文件
+            echo "插件 $plugin_name 的文件:"
+            ls -la "$plugin_name"/plugin-*.so 2>/dev/null || echo "没有找到 .so 文件"
+            
+            # 创建压缩包
+            if [ -d "temp_$plugin_name" ] && [ "$(ls -A temp_$plugin_name)" ]; then
+              tar -czf "${plugin_name}.tar.gz" -C "temp_$plugin_name" .
+              echo "成功创建压缩包: ${plugin_name}.tar.gz"
+            fi
+            
+            # 清理临时目录
+            rm -rf "temp_$plugin_name"
+          done
+
+          # 列出创建的压缩包
+          ls -la *.tar.gz
+
+      - name: Debug environment
+        run: |
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
+          echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+          echo "GITHUB_SHA: $GITHUB_SHA"
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # 从tag中提取版本号 (plugin@1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF#refs/tags/plugin@}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "提取的版本号: $VERSION"
+          echo "完整ref: $GITHUB_REF"
+          echo "ref名称: $GITHUB_REF_NAME"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "插件包 v${{ steps.extract_version.outputs.version }}"
+          body: |
+            ## 插件包发布 v${{ steps.extract_version.outputs.version }}
+
+            此版本包含以下插件的编译文件：
+
+            ### 包含的插件
+            - **glibc 版本**: 适用于标准 Linux 发行版和 macOS
+              - `plugin-linux-amd64.so`, `plugin-linux-arm64.so`
+              - `plugin-darwin-amd64.so`, `plugin-darwin-arm64.so`
+            - **musl 版本**: 适用于 Alpine Linux 等基于 musl 的容器
+              - `plugin-linux-amd64-musl.so`, `plugin-linux-arm64-musl.so`
+            - 插件配置文件 `setting.json`
+
+            ### 使用方法
+            1. 下载对应插件的压缩包
+            2. 解压到插件目录
+            3. 重启服务加载插件
+
+            ### 注意事项
+            - **glibc 版本**: 适用于 Ubuntu、CentOS、Debian 等标准 Linux 发行版和 macOS
+            - **musl 版本**: 专为 Alpine Linux 容器设计，更小更安全
+            - 请根据您的系统环境选择对应的 `.so` 文件
+            - 确保 `setting.json` 配置正确
+          files: backend/plugins/*.tar.gz
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
