@@ -35,9 +35,9 @@ const theme: VuetifyOptions['theme'] = {
         'on-success': '#FFFFFF',
         'on-warning': '#FFFFFF', // 深橙色背景配白字很清晰
         
-        background: '#F0F2F5',   
+        background: '#FFFFFF',   // 背景改为白色
         'on-background': '#202124', 
-        surface: '#FFFFFF',
+        surface: '#F2F4F7',      // 块改为浅灰色
         'on-surface': '#202124',
         
         'grey-50': '#F8F9FA',
