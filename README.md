@@ -5,7 +5,7 @@
 1. **创建 docker-compose.yml 文件**：
 ```yaml
 services:
-  notify-app:
+  notify:
     image: kyleyu2024/notify:latest
     container_name: notify
     ports:
@@ -22,13 +22,4 @@ services:
     restart: unless-stopped
 ```
 
-2. **启动服务**：
-```bash
-# 创建配置目录
-mkdir -p ./config
-
-# 启动服务
-docker-compose up -d
-```
-
-3.其他使用说明请移步原项目
+2.其他使用说明请移步原项目
